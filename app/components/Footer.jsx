@@ -4,7 +4,9 @@ export default function Footer(){
 <footer className="footer footer-center bg-base-200 text-base-content rounded p-10">
   <nav className="grid grid-flow-col gap-4">
     <a className="link link-hover">About us</a>
-    <a className="link link-hover">Contact</a>
+    <a href="mailto:marissa.bianca.lamothe@gmail.com?subject=Hello&body=Hi%20there" className="link link-hover">
+  Contact
+</a>
     <a className="link link-hover">Jobs</a>
     <a className="link link-hover">Press kit</a>
   </nav>
@@ -46,7 +48,7 @@ export default function Footer(){
     </div>
   </nav>
   <aside>
-    <p>Copyright © {new Date().getFullYear()} - All rights reserved by Urban Canvas</p>
+    <p>Copyright © {new Date().getFullYear()} - All rights reserved by Marissa Lamothe</p>
   </aside>
 </footer>
     )
