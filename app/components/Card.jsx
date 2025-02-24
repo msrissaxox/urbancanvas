@@ -4,10 +4,11 @@ import ImageUploading from 'react-images-uploading';
 import CommentSection from "./CommentSection";
 
 export default function Card(props){
-const [like, setLike] = useState('');
-const [isLiked, setIsLiked] = useState(false);
+// const [like, setLike] = useState('');
+// const [isLiked, setIsLiked] = useState(false);
 const [images, setImages] = useState([]);
 const [submittedImages, setSubmittedImages] = useState([]);
+const [showCommentSection, setShowCommentSection] = useState(false); // State to manage comment section visibility
 const maxNumber = 5; //might have to change later
 
 const onChange = (imageList) => {
@@ -17,13 +18,15 @@ const onChange = (imageList) => {
       city: images[index]?.city || "", 
       state: images[index]?.state || "",
       caption: images[index]?.caption || "",
+      isLiked: images[index]?.isLiked || false,
+      like: images[index]?.like || 0,
     }));
     setImages(updatedList);
   };
 
   const handleCommentClick = () => {
-    <CommentSection />
-}
+    setShowCommentSection(!showCommentSection); // Toggle comment section visibility
+  };
 
     // Update Input Fields (City, State, Caption)
     const handleInputChange = (index, field, value) => {
@@ -32,7 +35,7 @@ const onChange = (imageList) => {
         setImages(updatedImages);
       };
 
-
+      //handle submit button
       const handleSubmit = () => {
         setSubmittedImages([...submittedImages, ...images]);
         setImages([]);
@@ -41,19 +44,29 @@ const onChange = (imageList) => {
 //This function checks to see if the like button has been clicked. 
 // If it has, it will increment the like count by 1. 
 // If it hasn't, it will decrement the like count by 1.
-
-function handleClick() {
-  if (isLiked) {
-    setLike(Number(like - 1))
-    setIsLiked(false);
-  } else {
-    setLike(Number(like + 1))
-    setIsLiked(true);
-  }
-  console.log("I was clicked");
+const handleClick = (index) => {
+//   if (isLiked) {
+//     setLike(Number(like - 1))
+//     setIsLiked(false);
+//   } else {
+//     setLike(Number(like + 1))
+//     setIsLiked(true);
+//   }
+//   console.log("I was clicked");
+// };
+const updatedImages = [...submittedImages];
+if (updatedImages[index]) {
+    if (updatedImages[index].isLiked) {
+    updatedImages[index].like -= 1;
+  updatedImages[index].isLiked = false;
+} else {
+  updatedImages[index].like += 1;
+  updatedImages[index].isLiked = true;
+}
+setSubmittedImages(updatedImages);
+}
 };
 
-    
 return (
 <div>
 <div className="App">
@@ -118,9 +131,9 @@ return (
           {/* Right: Like & Comment */}
           <div className="flex items-center gap-3">
             <svg 
-              onClick={handleClick} 
+              onClick={()=> handleClick(index)} 
               xmlns="http://www.w3.org/2000/svg" 
-              fill={isLiked ? 'red' : 'none'} 
+              fill={image.isLiked ? 'red' : 'none'} 
               viewBox="0 0 24 24" 
               strokeWidth={1.5} 
               stroke="currentColor" 
@@ -132,7 +145,7 @@ return (
                 d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" 
               />
             </svg>
-            <span className="text-white">{like}</span>
+            <span className="text-white">{image.like}</span>
             <button className="text-white" onClick={handleCommentClick}>Comment</button>
           
           </div>
@@ -140,6 +153,10 @@ return (
 
         {/* Caption */}
         <p className="text-base text-white">{image.caption}</p>
+
+         {/* Conditionally Render CommentSection */}
+        {showCommentSection && <CommentSection />}
+
       </div>
     </div>
   ))}

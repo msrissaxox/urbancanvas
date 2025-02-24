@@ -1,7 +1,7 @@
 'use client'
 import { useState } from "react";
-import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar } from "./ui/Avatar";
+import { Button } from "./ui/Button";
 import { MessageCircle, Send } from "lucide-react";
 
 
