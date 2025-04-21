@@ -1,7 +1,6 @@
-'use client'
+"use client";
 import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
-
 
 const getRotationTransition = (duration, from, loop = true) => ({
   from: from,

@@ -1,49 +1,50 @@
-'use client'
+"use client";
 import { useState } from "react";
 import { Avatar } from "./ui/Avatar";
 import { Button } from "./ui/Button";
 import { MessageCircle, Send } from "lucide-react";
 
-
-
-export default function CommentSection(){
+export default function CommentSection() {
   const [isOpen, setIsOpen] = useState(false);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([
     {
       id: 1,
-      user: 'Sarah Chen',
-      text: 'Beautiful composition! Love the lighting in this shot.',
-      date: '2024-02-23 14:30'
+      user: "Sarah Chen",
+      text: "Beautiful composition! Love the lighting in this shot.",
+      date: "2024-02-23 14:30",
     },
     {
       id: 2,
-      user: 'Mike Johnson',
-      text: 'Great capture! The colors are amazing.',
-      date: '2024-02-23 15:45'
-    }
+      user: "Mike Johnson",
+      text: "Great capture! The colors are amazing.",
+      date: "2024-02-23 15:45",
+    },
   ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-    
+
     const now = new Date();
-    const formattedDate = now.toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+    const formattedDate = now.toLocaleString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-    
-    setComments([...comments, {
-      id: comments.length + 1,
-      user: 'Current User',
-      text: newComment,
-      date: formattedDate
-    }]);
-    setNewComment('');
+
+    setComments([
+      ...comments,
+      {
+        id: comments.length + 1,
+        user: "Current User",
+        text: newComment,
+        date: formattedDate,
+      },
+    ]);
+    setNewComment("");
   };
 
   return (
@@ -62,13 +63,15 @@ export default function CommentSection(){
         <div className="bg-white rounded-lg shadow p-4">
           {/* Comment List */}
           <div className="space-y-4 mb-4">
-            {comments.map(comment => (
+            {comments.map((comment) => (
               <div key={comment.id} className="flex gap-3">
                 <Avatar className="w-8 h-8" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{comment.user}</span>
-                    <span className="text-sm text-gray-500">{comment.date}</span>
+                    <span className="text-sm text-gray-500">
+                      {comment.date}
+                    </span>
                   </div>
                   <p className="text-gray-700 mt-1">{comment.text}</p>
                 </div>
@@ -94,6 +97,4 @@ export default function CommentSection(){
       )}
     </div>
   );
-};
-
-
+}
