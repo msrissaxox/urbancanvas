@@ -86,9 +86,9 @@ export default function Card(props) {
             dragProps,
           }) => (
             // write your building UI
-            <div className="upload__image-wrapper">
-              <button
-                className="bg-stone-600 text-white font-bold text-xs py-1 px-1 rounded"
+<div className="image-item__btn-wrapper flex justify-center gap-4 mt-2">
+<button
+                className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
                 style={isDragging ? { color: "red" } : undefined}
                 onClick={onImageUpload}
                 {...dragProps}
@@ -130,13 +130,13 @@ export default function Card(props) {
 
                   <div className="image-item__btn-wrapper">
                     <button
-                      className="bg-stone-600 text-white font-bold text-xs py-1 px-1 rounded"
+                      className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
                       onClick={() => onImageUpdate(index)}
                     >
                       Update
                     </button>
                     <button
-                      className="bg-stone-600 text-white font-bold text-xs py-1 px-1 rounded"
+                      className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
                       onClick={() => onImageRemove(index)}
                     >
                       Remove
@@ -147,13 +147,17 @@ export default function Card(props) {
             </div>
           )}
         </ImageUploading>
+
       </div>
-      <button
-        className="bg-stone-600 text-white font-bold text-xs py-1 px-1 rounded"
-        onClick={handleSubmit}
-      >
-        Submit
-      </button>
+      
+      <div className="flex justify-center my-4">
+  <button
+    className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+    onClick={handleSubmit}
+  >
+    Submit
+  </button>
+</div>
 
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 pb-5">
         {submittedImages.map((image, index) => (

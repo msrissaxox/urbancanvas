@@ -10,8 +10,8 @@ export default function Footer() {
         >
           Contact
         </a>
-        <a className="link link-hover">Jobs</a>
-        <a className="link link-hover">Press kit</a>
+        <a className="link link-hover">GitHub</a>
+        <a className="link link-hover">Portfolio</a>
       </nav>
       <nav>
         <div className="grid grid-flow-col gap-4">

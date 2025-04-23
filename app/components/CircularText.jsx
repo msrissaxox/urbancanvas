@@ -25,6 +25,7 @@ const CircularText = ({
   spinDuration = 20,
   onHover = "speedUp",
   className = "",
+style = {},
 }) => {
   const letters = Array.from(text);
   const controls = useAnimation();
@@ -87,6 +88,10 @@ const CircularText = ({
   };
 
   return (
+    <div
+    className={`mx-auto ${className}`}
+    style={style} // Apply the background style to the parent container
+  >
     <motion.div
       initial={{ rotate: 0 }}
       className={`mx-auto rounded-full w-[200px] h-[200px] text-white font-black text-center cursor-pointer origin-center ${className}`}
@@ -94,6 +99,7 @@ const CircularText = ({
       onUpdate={(latest) => setCurrentRotation(Number(latest.rotate))}
       onMouseEnter={handleHoverStart}
       onMouseLeave={handleHoverEnd}
+     
     >
       {letters.map((letter, i) => {
         const rotation = (360 / letters.length) * i;
@@ -113,6 +119,7 @@ const CircularText = ({
         );
       })}
     </motion.div>
+    </div>
   );
 };
 
