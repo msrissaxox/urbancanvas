@@ -1,6 +1,6 @@
-import LogInNav from "../app/components/LogInNav";
+import LogInNav from "./components/LogInNav/LogInNav";
 import MuralGrid from "../app/components/MuralGrid";
-import Footer from "../app/components/Footer";
+import Footer from "./components/Footer/Footer";
 import CircularText from "./components/CircularText";
 
 export default function Home() {

@@ -1,18 +1,15 @@
 "use client";
 import React, { useState } from "react";
 import { signIn } from "next-auth/react";
+import Header from "./Header";
 
 export default function LogInNav() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <nav className="flex items-center justify-between flex-wrap bg-gradient-to-tl from-stone-900 to-stone-600 p-6">
-      <div className="flex items-center flex-shrink-0 text-gray-300 mr-6">
-        <span className="font-semibold text-md md:text-2xl tracking-tight">
-          Urban Canvas - Street Art, Socially Mapped
-        </span>
-      </div>
-
+    <Header />
+   
       {/* Mobile Menu Button */}
       <div className="block lg:hidden">
         <button
@@ -30,7 +27,7 @@ export default function LogInNav() {
         </button>
       </div>
 
-      {/* Menu Items */}
+      {/* /* Menu Items */}
       <div
         className={`w-full lg:flex lg:items-center lg:w-auto ${isOpen ? "block" : "hidden"}`}
       >
