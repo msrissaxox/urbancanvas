@@ -4,12 +4,13 @@ import ImageUploading from "react-images-uploading";
 import CommentSection from "./CommentSection";
 
 export default function Card(props) {
-  // const [like, setLike] = useState('');
-  // const [isLiked, setIsLiked] = useState(false);
+
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
   const [showCommentSection, setShowCommentSection] = useState(false); // State to manage comment section visibility
   const maxNumber = 5; //might have to change later
+  const [submitButton, showSubmitButton] = useState(false);
+  const [uploadButton, showUploadButton] = useState(true);
 
   const onChange = (imageList) => {
     const updatedList = imageList.map((props, index) => ({
@@ -37,6 +38,14 @@ export default function Card(props) {
 
   //handle submit button
   const handleSubmit = () => {
+    const isValid = images.every(
+      (image) =>
+        image.city && image.state && image.caption && image.data_url
+    );
+    if (!isValid) {
+      alert("Please fill in all fields for each image.");
+      return;
+    }
     setSubmittedImages([...submittedImages, ...images]);
     setImages([]);
   };
@@ -45,15 +54,7 @@ export default function Card(props) {
   // If it has, it will increment the like count by 1.
   // If it hasn't, it will decrement the like count by 1.
   const handleClick = (index) => {
-    //   if (isLiked) {
-    //     setLike(Number(like - 1))
-    //     setIsLiked(false);
-    //   } else {
-    //     setLike(Number(like + 1))
-    //     setIsLiked(true);
-    //   }
-    //   console.log("I was clicked");
-    // };
+
     const updatedImages = [...submittedImages];
     if (updatedImages[index]) {
       if (updatedImages[index].isLiked) {
@@ -87,33 +88,46 @@ export default function Card(props) {
           }) => (
             // write your building UI
 <div className="image-item__btn-wrapper flex justify-center gap-4 mt-2">
-<button
+
+{uploadButton && (  
+              <button
                 className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
                 style={isDragging ? { color: "red" } : undefined}
-                onClick={onImageUpload}
+                onClick={() => {
+                  onImageUpload();
+                  showSubmitButton(true);
+                  showUploadButton(false);
+                
+                }}
+               
                 {...dragProps}
               >
                 Click to Upload
               </button>
-
+)}
+            
               {imageList.map((props, index) => (
                 <div key={index} className="image-item">
                   <img
-                    className="w-full rounded-lg"
+
+                    className="w-64 h-64 rounded-lg object-cover" 
                     src={props["data_url"]}
                     alt=""
                   />
+                  <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     placeholder="City"
+                    required={true}
                     value={props.city}
                     onChange={(e) =>
-                      handleInputChange(index, "city", e.target.value)
-                    }
+                      handleInputChange(index, "city", e.target.value)}
+                    
                   />
                   <input
                     type="text"
                     placeholder="State"
+                    required={true}
                     value={props.state}
                     onChange={(e) =>
                       handleInputChange(index, "state", e.target.value)
@@ -122,11 +136,14 @@ export default function Card(props) {
                   <input
                     type="text"
                     placeholder="Caption"
+                    required={true}
                     value={props.caption}
                     onChange={(e) =>
                       handleInputChange(index, "caption", e.target.value)
                     }
                   />
+                  </div>
+
 
                   <div className="image-item__btn-wrapper">
                     <button
@@ -151,19 +168,30 @@ export default function Card(props) {
       </div>
       
       <div className="flex justify-center my-4">
+  
+  {submitButton && (  
+  <div className="flex justify-center my-4">  
+  
   <button
     className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+    
+
     onClick={handleSubmit}
-  >
+
+    >
     Submit
   </button>
 </div>
+  )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 pb-5">
+
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 pb-10 justify-center items-center">
         {submittedImages.map((image, index) => (
           <div key={index} className="card">
             <img
-              className="w-full h-50 rounded-lg"
+              className="w-64 h-64 self-center rounded-lg p-3 object-cover"
               src={image["data_url"]}
               alt="Uploaded"
             />
@@ -172,9 +200,10 @@ export default function Card(props) {
               {/* Location and Actions Row */}
               <div className="flex items-center justify-between w-full mb-2">
                 {/* Left: Location */}
+
                 <div className="flex items-center gap-2">
                   <span className="text-white">📍</span>
-                  <h5 className="text-xl text-white font-medium">
+                  <h5 className="text-md text-white font-medium">
                     {image.city}, {image.state}
                   </h5>
                 </div>
@@ -201,6 +230,9 @@ export default function Card(props) {
                     Comment
                   </button>
                 </div>
+
+
+
               </div>
 
               {/* Caption */}
