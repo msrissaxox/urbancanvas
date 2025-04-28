@@ -2,13 +2,15 @@
 import React, { useState } from "react";
 import ImageUploading from "react-images-uploading";
 import CommentSection from "./CommentSection";
+import { BsChat } from "react-icons/bs";
+
 
 export default function Card(props) {
 
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
   const [showCommentSection, setShowCommentSection] = useState(false); // State to manage comment section visibility
-  const maxNumber = 5; //might have to change later
+  const maxNumber = 1; //might have to change later
   const [submitButton, showSubmitButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
 
@@ -16,6 +18,7 @@ export default function Card(props) {
     const updatedList = imageList.map((props, index) => ({
       ...images[index], // Preserve existing city, state, and caption if already set
       ...props,
+  
       city: images[index]?.city || "",
       state: images[index]?.state || "",
       caption: images[index]?.caption || "",
@@ -69,7 +72,7 @@ export default function Card(props) {
   };
 
   return (
-    <div>
+<div>
       <div className="App">
         <ImageUploading
           multiple
@@ -87,7 +90,7 @@ export default function Card(props) {
             dragProps,
           }) => (
             // write your building UI
-<div className="image-item__btn-wrapper flex justify-center gap-4 mt-2">
+<div className="image-item__btn-wrapper flex flex-col justify-center items-center gap-4 mt-2">
 
 {uploadButton && (  
               <button
@@ -97,9 +100,10 @@ export default function Card(props) {
                   onImageUpload();
                   showSubmitButton(true);
                   showUploadButton(false);
-                
+                  setTimeout(() => {
+                    showUploadButton(true); // Show the Upload button again
+                  }, 1000);
                 }}
-               
                 {...dragProps}
               >
                 Click to Upload
@@ -109,7 +113,6 @@ export default function Card(props) {
               {imageList.map((props, index) => (
                 <div key={index} className="image-item">
                   <img
-
                     className="w-64 h-64 rounded-lg object-cover" 
                     src={props["data_url"]}
                     alt=""
@@ -133,6 +136,7 @@ export default function Card(props) {
                       handleInputChange(index, "state", e.target.value)
                     }
                   />
+         
                   <input
                     type="text"
                     placeholder="Caption"
@@ -142,7 +146,8 @@ export default function Card(props) {
                       handleInputChange(index, "caption", e.target.value)
                     }
                   />
-                  </div>
+                    </div>
+                  
 
 
                   <div className="image-item__btn-wrapper">
@@ -183,33 +188,33 @@ export default function Card(props) {
   </button>
 </div>
   )}
-
-
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-4 pb-10 justify-center items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 pb-5 m-5 justify-center items-center">
         {submittedImages.map((image, index) => (
           <div key={index} className="card">
             <img
-              className="w-64 h-64 self-center rounded-lg p-3 object-cover"
+              className="w-64 h-64 self-center rounded-badge p-2 object-cover"
               src={image["data_url"]}
               alt="Uploaded"
             />
 
-            <div className="p-6">
+            <div className="p-1">
               {/* Location and Actions Row */}
-              <div className="flex items-center justify-between w-full mb-2">
+              <div className="flex flex-col justify-between w-full mb-2">
                 {/* Left: Location */}
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
+              
                   <span className="text-white">📍</span>
-                  <h5 className="text-md text-white font-medium">
+                  <h5 className="text-white text-sm font-bold">
                     {image.city}, {image.state}
                   </h5>
                 </div>
 
-                {/* Right: Like & Comment */}
-                <div className="flex items-center gap-3">
+                {/* Like*/}
+                <div className="flex flex-row justify-between">
+                  <div className="flex justify-start items-start mt-2">
                   <svg
                     onClick={() => handleClick(index)}
                     xmlns="http://www.w3.org/2000/svg"
@@ -226,24 +231,29 @@ export default function Card(props) {
                     />
                   </svg>
                   <span className="text-white">{image.like}</span>
+</div>
+
+
+{/* comment icon*/}
+           <div className="flex justify-start items-start mt-2">
                   <button className="text-white" onClick={handleCommentClick}>
-                    Comment
+                  <BsChat className="text-white size-5 flex items-start" />
                   </button>
-                </div>
-
-
-
               </div>
-
+</div>
               {/* Caption */}
-              <p className="text-base text-white">{image.caption}</p>
+              <p className="text-white text-sm flex items-center text-center justify-center">{image.caption}</p>
 
               {/* Conditionally Render CommentSection */}
               {showCommentSection && <CommentSection />}
             </div>
+
+          </div>
           </div>
         ))}
+
       </div>
-    </div>
-  );
+ </div>
+      
+  )
 }

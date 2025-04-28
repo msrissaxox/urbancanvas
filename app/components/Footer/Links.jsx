@@ -1,3 +1,5 @@
+import Link
+ from "next/link"
 export default function Links(){
     return (
 <nav className="grid grid-flow-col gap-4">
@@ -8,8 +10,8 @@ export default function Links(){
 >
   Contact
 </a>
-<a className="link link-hover">GitHub</a>
-<a className="link link-hover">Portfolio</a>
+<Link href="https://www.github.com/msrissaxox" target="_blank">GitHub</Link>
+<Link href="https://www.marissalamothe.dev" target="_blank">Portfolio</Link>
 </nav>
     )
 }
