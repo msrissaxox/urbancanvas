@@ -8,8 +8,8 @@ export default function LogInNav() {
 
   return (
     <nav className="flex items-center justify-between flex-wrap bg-gradient-to-tl from-stone-900 to-stone-600 p-6">
-    <Header />
-   
+      <Header />
+
       {/* Mobile Menu Button */}
       <div className="block lg:hidden">
         <button

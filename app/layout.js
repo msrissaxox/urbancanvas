@@ -25,7 +25,7 @@ export const metadata = {
     "social media for artists",
     "mural map",
     "graffiti art",
-    "street murals"
+    "street murals",
   ],
   openGraph: {
     title: "Urban Canvas",

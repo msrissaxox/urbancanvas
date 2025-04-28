@@ -17,7 +17,7 @@ export async function GET(req) {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
   } catch (error) {
     console.error("Database connection error:", error);
@@ -32,7 +32,7 @@ export async function GET(req) {
         headers: {
           "Content-Type": "application/json",
         },
-      },
+      }
     );
   }
 }
