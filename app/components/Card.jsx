@@ -1,16 +1,20 @@
 "use client";
 import React, { useState } from "react";
 import ImageUploading from "react-images-uploading";
-import CommentSection from "./CommentSection";
-import { BsChat } from "react-icons/bs";
+import { IoShareSocialOutline } from "react-icons/io5";
+import SocialShareMedia from "./ui/SocialShareMedia";
+
 
 export default function Card(props) {
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
-  const [showCommentSection, setShowCommentSection] = useState(false); // State to manage comment section visibility
   const maxNumber = 1; //might have to change later
   const [submitButton, showSubmitButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const openShareModal = () => setIsShareModalOpen(true);
+  const closeShareModal = () => setIsShareModalOpen(false);
+
 
   const onChange = (imageList) => {
     const updatedList = imageList.map((props, index) => ({
@@ -26,9 +30,7 @@ export default function Card(props) {
     setImages(updatedList);
   };
 
-  const handleCommentClick = () => {
-    setShowCommentSection(!showCommentSection); // Toggle comment section visibility
-  };
+
 
   // Update Input Fields (City, State, Caption)
   const handleInputChange = (index, field, value) => {
@@ -136,11 +138,20 @@ export default function Card(props) {
                       type="text"
                       placeholder="Caption"
                       required={true}
+                      maxLength={100}
+                      minLength={10}
                       value={props.caption}
                       onChange={(e) =>
                         handleInputChange(index, "caption", e.target.value)
                       }
+
                     />
+                    {props.caption.length && props.caption.length < 10 && (
+                      <p className="text-red-500 text-sm">Caption must be at least 10 characters long.</p>
+                    )}
+                    {props.caption.length > 100 && (
+                      <p className="text-red-500 text-sm"> Caption cannot exceed 150 characters.</p>
+                    )}
                   </div>
 
                   <div className="image-item__btn-wrapper mt-4">
@@ -219,10 +230,10 @@ export default function Card(props) {
                     <span className="text-white">{image.like}</span>
                   </div>
 
-                  {/* comment icon*/}
+                  {/* turn this into share icon*/}
                   <div className="flex justify-start items-start mt-2">
-                    <button className="text-white" onClick={handleCommentClick}>
-                      <BsChat className="text-white size-5 flex items-start" />
+                    <button className="text-white" onClick={openShareModal}>
+                      <IoShareSocialOutline className="text-white size-5 flex items-start" />
                     </button>
                   </div>
                 </div>
@@ -231,13 +242,12 @@ export default function Card(props) {
                   {image.caption}
                 </p>
 
-                {/* Conditionally Render CommentSection */}
-                {showCommentSection && <CommentSection />}
               </div>
             </div>
           </div>
         ))}
       </div>
+      <SocialShareMedia isOpen={isShareModalOpen} onClose={closeShareModal} />
     </div>
   );
 }
