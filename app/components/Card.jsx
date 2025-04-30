@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import ImageUploading from "react-images-uploading";
 import { IoShareSocialOutline } from "react-icons/io5";
 import SocialShareMedia from "./ui/SocialShareMedia";
+import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 
 export default function Card(props) {
@@ -12,6 +13,7 @@ export default function Card(props) {
   const [submitButton, showSubmitButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
 
@@ -87,7 +89,7 @@ export default function Card(props) {
             isDragging,
             dragProps,
           }) => (
-            // write your building UI
+            // my UI
             <div className="image-item__btn-wrapper flex flex-col justify-center items-center gap-4 mt-2">
               {uploadButton && (
                 <button
@@ -136,7 +138,7 @@ export default function Card(props) {
 
                     <input
                       type="text"
-                      placeholder="Caption"
+                      placeholder="Tell us how this artwork moved you"
                       required={true}
                       maxLength={100}
                       minLength={10}
@@ -144,12 +146,13 @@ export default function Card(props) {
                       onChange={(e) =>
                         handleInputChange(index, "caption", e.target.value)
                       }
-
                     />
-                    {props.caption.length && props.caption.length < 10 && (
+                    
+                    {props.caption && props.caption.length < 10 && (
                       <p className="text-red-500 text-sm">Caption must be at least 10 characters long.</p>
                     )}
-                    {props.caption.length > 100 && (
+
+                    {props.caption && props.caption.length > 150 && (
                       <p className="text-red-500 text-sm"> Caption cannot exceed 150 characters.</p>
                     )}
                   </div>
@@ -188,6 +191,7 @@ export default function Card(props) {
         )}
       </div>
 
+      {/* Display submitted images below*/}
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 pb-5 m-5 justify-center items-center">
         {submittedImages.map((image, index) => (
           <div key={index} className="card">
@@ -200,7 +204,7 @@ export default function Card(props) {
             <div className="p-1">
               {/* Location and Actions Row */}
               <div className="flex flex-col justify-between w-full mb-2">
-                {/* Left: Location */}
+                {/*Location */}
 
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-white">📍</span>
@@ -209,8 +213,9 @@ export default function Card(props) {
                   </h5>
                 </div>
 
-                {/* Like*/}
-                <div className="flex flex-row justify-between">
+                {/* Like & Share */}
+
+                <div className="flex flex-row justify-center items-center gap-2 h-8 pb-2">
                   <div className="flex justify-start items-start mt-2">
                     <svg
                       onClick={() => handleClick(index)}
@@ -227,27 +232,46 @@ export default function Card(props) {
                         d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
                       />
                     </svg>
-                    <span className="text-white">{image.like}</span>
+
+                  {image.like > 0 && <span className="text-white">{image.like}</span>}
                   </div>
 
-                  {/* turn this into share icon*/}
+                  {/* share icon*/}
                   <div className="flex justify-start items-start mt-2">
-                    <button className="text-white" onClick={openShareModal}>
-                      <IoShareSocialOutline className="text-white size-5 flex items-start" />
-                    </button>
+                      <IoShareSocialOutline 
+                      className="text-white size-5 cursor-pointer"
+                      onClick={openShareModal}
+                      />
+                          <ClickAwayListener
+                          mouseEvent="onMouseDown"
+                          touchEvent="onTouchStart"
+                          onClickAway={closeShareModal}>
+                        {/* This SocialShareMedia icon is a modal that opens when the share icon is clicked */}
+                        {/* It contains the share options for the image */}
+
+                          <SocialShareMedia isOpen={isShareModalOpen} onClose={closeShareModal} />
+
+                      </ClickAwayListener>
+
+                    </div>
                   </div>
+
                 </div>
+
+
                 {/* Caption */}
-                <p className="text-white text-sm flex items-center text-center justify-center">
+                <p className="text-white text-sm flex items-center text-center justify-center h-20"
+                style={{ lineHeight: "1.5rem" }}
+                >
                   {image.caption}
                 </p>
 
               </div>
             </div>
-          </div>
         ))}
       </div>
-      <SocialShareMedia isOpen={isShareModalOpen} onClose={closeShareModal} />
+
+
     </div>
   );
 }

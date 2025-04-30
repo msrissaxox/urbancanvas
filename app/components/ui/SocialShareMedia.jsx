@@ -1,10 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
 import {
   Modal, Box, IconButton, Typography, List, ListItem, ListItemIcon,
   ListItemText, Snackbar, SnackbarContent, Stack
 } from '@mui/material';
+
+import ClickAwayListener from '@mui/material/ClickAwayListener';
+
+
 import {
   EmailShareButton, FacebookShareButton, TwitterShareButton,
   TelegramShareButton, LinkedinShareButton, WhatsappShareButton,
@@ -21,8 +26,15 @@ import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import RedditIcon from '@mui/icons-material/Reddit';
 import CheckIcon from '@mui/icons-material/Check';
+//Modal named SocialShareMedia with 2 props
+// isOpen and onClose
+// This modal will be used to share the post on social media
+
 
 const SocialShareMedia = ({ isOpen, onClose }) => {
+  //This const creates a reference to the modal's container DOM node.We will use this to detect clicks outside the modal to close it.
+  
+
   const [currentUrl, setCurrentUrl] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
@@ -32,6 +44,10 @@ const SocialShareMedia = ({ isOpen, onClose }) => {
     }
   }, []);
 
+
+
+// This is a placeholder for the current URL.
+//change this to take the current link for the post
   const handleCopyLink = () => {
     navigator.clipboard.writeText(currentUrl).then(() => {
       setSnackbarOpen(true);
@@ -40,10 +56,8 @@ const SocialShareMedia = ({ isOpen, onClose }) => {
     });
   };
 
-  const handleOpen = () => isOpen(true);
-  const handleClose = () => setOpen(false);
+const handleSnackbarClose = () => setSnackbarOpen(false);
   
-  const handleSnackbarClose = () => setSnackbarOpen(false);
 
   const socialIcons = [
     { icon: <LinkIcon />, label: "Copy link", onClick: handleCopyLink },
@@ -57,15 +71,24 @@ const SocialShareMedia = ({ isOpen, onClose }) => {
   ];
 
   return (
+    <ClickAwayListener 
+    mouseEvent="onMouseDown"
+    touchEvent="onTouchStart"
+    onClickAway={onClose}>
     <div>
-      <hr />
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <IconButton onClick={handleOpen} aria-label="Open social share options">
-          <ShareIcon />
-        </IconButton>
-      </Stack>
+    
+      {/* <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+        <IconButton onClick={() => onClose(false)} aria-label="Open social share options">
+           <ShareIcon />
+        </IconButton> 
+      </Stack> */}
 
-      <Modal open={isOpen} onClose={handleClose}>
+      <Modal 
+      open={isOpen} 
+      onClose={onClose}
+   
+      >
+      
         <Box sx={{
           position: 'absolute', top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)', width: 300,
@@ -77,7 +100,7 @@ const SocialShareMedia = ({ isOpen, onClose }) => {
             {socialIcons.map((social, index) => {
               if (social.label === 'Copy link') {
                 return (
-                  <ListItem button key={index} onClick={social.onClick}>
+                  <ListItem button='This is the button' key={index} onClick={social.onClick}>
                     <ListItemIcon>{social.icon}</ListItemIcon>
                     <ListItemText primary={social.label} />
                   </ListItem>
@@ -116,6 +139,7 @@ const SocialShareMedia = ({ isOpen, onClose }) => {
         />
       </Snackbar>
     </div>
+    </ClickAwayListener>
   );
 };
 
