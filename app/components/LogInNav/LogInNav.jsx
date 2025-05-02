@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
-import { signIn } from "next-auth/react";
+
 import Header from "./Header";
 
-export default function LogInNav() {
+export default function LogInNav({ loginLink, registerLink }) {
   const [isOpen, setIsOpen] = useState(false);
+
 
   return (
     <nav className="flex items-center justify-between flex-wrap bg-gradient-to-tl from-stone-900 to-stone-600 p-6">
@@ -32,14 +33,12 @@ export default function LogInNav() {
         className={`w-full lg:flex lg:items-center lg:w-auto ${isOpen ? "block" : "hidden"}`}
       >
         <div className="flex flex-col items-center lg:flex-row lg:space-x-4 w-full lg:w-auto">
-          <button
-            onClick={() => signIn("auth0")}
+          <a href={loginLink}
             className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
           >
             Log In
-          </button>
-          <a
-            href="#"
+          </a>
+          <a href={registerLink}
             className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
           >
             Register
@@ -48,4 +47,5 @@ export default function LogInNav() {
       </div>
     </nav>
   );
+
 }

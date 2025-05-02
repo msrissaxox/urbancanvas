@@ -1,7 +1,16 @@
+// {
+//   "compilerOptions": {
+//     "paths": {
+//       "@/*": ["./src/lib/*"]
+//     }
+//   }
+// }
+
 {
   "compilerOptions": {
+    "baseUrl": ".", // Ensures paths are resolved relative to the project root
     "paths": {
-      "@/*": ["./src/*"]
+      "@lib/*": ["./src/lib/*"] // Maps @lib to the src/lib directory
     }
   }
 }
