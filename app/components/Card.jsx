@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import ImageUploading from "react-images-uploading";
 import { IoShareSocialOutline } from "react-icons/io5";
 import SocialShareMedia from "./ui/SocialShareMedia";
@@ -7,6 +8,7 @@ import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 
 export default function Card(props) {
+  const { data: session } = useSession(); //This gets the session data from next-auth
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
   const maxNumber = 1; //might have to change later
@@ -31,8 +33,21 @@ export default function Card(props) {
     }));
     setImages(updatedList);
   };
+//Handle image Update
+  const onImageUpdate = (index) => {
+    const updatedImages = [...submittedImages];
+    const updatedImage = prompt("Enter a new image URL:", updatedImages[index].data_url);
+    if (updatedImage) {
+      updatedImages[index] = { ...updatedImages[index], data_url: updatedImage };
+      setSubmittedImages(updatedImages);
+    }
+  };
 
-
+  //Handle image Remove
+  const onImageRemove = (index) => {
+    const updatedImages = submittedImages.filter((_, i) => i !== index);
+    setSubmittedImages(updatedImages);
+  };
 
   // Update Input Fields (City, State, Caption)
   const handleInputChange = (index, field, value) => {
@@ -58,6 +73,10 @@ export default function Card(props) {
   // If it has, it will increment the like count by 1.
   // If it hasn't, it will decrement the like count by 1.
   const handleClick = (index) => {
+    if (!session) {
+      alert("Please log in to like an image.");
+      return;
+    }
     const updatedImages = [...submittedImages];
     if (updatedImages[index]) {
       if (updatedImages[index].isLiked) {
@@ -74,6 +93,7 @@ export default function Card(props) {
   return (
     <div>
       <div className="App">
+        {session ? (
         <ImageUploading
           multiple
           value={images}
@@ -84,8 +104,6 @@ export default function Card(props) {
           {({
             imageList,
             onImageUpload,
-            onImageUpdate,
-            onImageRemove,
             isDragging,
             dragProps,
           }) => (
@@ -157,7 +175,9 @@ export default function Card(props) {
                     )}
                   </div>
 
-                  <div className="image-item__btn-wrapper mt-4">
+                  {/* <div className="image-item__btn-wrapper mt-4">
+                    {session && (
+                      <>
                     <button
                       className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
                       onClick={() => onImageUpdate(index)}
@@ -170,16 +190,26 @@ export default function Card(props) {
                     >
                       Remove
                     </button>
-                  </div>
+                    </>)}
+                  </div> */}
+
+
                 </div>
               ))}
             </div>
           )}
         </ImageUploading>
+        ) : (
+       <></>
+        )}
+          <div className="flex justify-center items-center">
+       
+          </div>
+        
       </div>
 
       <div className="flex justify-center my-2">
-        {submitButton && (
+        {submitButton && session && (
           <div className="flex justify-center my-4">
             <button
               className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
@@ -254,6 +284,23 @@ export default function Card(props) {
                       </ClickAwayListener>
 
                     </div>
+                  </div>
+                  <div className="image-item__btn-wrapper mt-4">
+                    {session && (
+                      <>
+                    <button
+                      className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+                      onClick={() => onImageUpdate(index)}
+                    >
+                      Update
+                    </button>
+                    <button
+                      className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+                      onClick={() => onImageRemove(index)}
+                    >
+                      Remove
+                    </button>
+                    </>)}
                   </div>
 
                 </div>

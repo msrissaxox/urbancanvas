@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from "react";
+import { useSession } from "next-auth/react";
 import Header from "./Header";
 import LoginButton from "./LoginBtn";
 import LogoutButton from "./LogoutBtn";
 
-export default function LogInNav({ loginLink, registerLink }) {
+export default function LogInNav() {
   const [isOpen, setIsOpen] = useState(false);
-
+  const { data: session } = useSession(); //This gets the session data from next-auth
 
   return (
     <nav className="flex items-center justify-between flex-wrap bg-gradient-to-tl from-stone-900 to-stone-600 p-6">
@@ -34,9 +35,15 @@ export default function LogInNav({ loginLink, registerLink }) {
         className={`w-full lg:flex lg:items-center lg:w-auto ${isOpen ? "block" : "hidden"}`}
       >
         <div className="flex flex-col items-center lg:flex-row lg:space-x-4 w-full lg:w-auto">
-<LoginButton />
+{session ? (  
+  <>
 <LogoutButton />
-          
+</>
+) : (
+  <>
+<LoginButton />
+    </>
+)}      
         </div>
       </div>
     </nav>
