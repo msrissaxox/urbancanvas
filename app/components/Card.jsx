@@ -1,16 +1,16 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ImageUploading from "react-images-uploading";
 import { IoShareSocialOutline } from "react-icons/io5";
 import SocialShareMedia from "./ui/SocialShareMedia";
 import ClickAwayListener from '@mui/material/ClickAwayListener';
 
-
 export default function Card(props) {
   const { data: session } = useSession(); //This gets the session data from next-auth
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
+  const [posts, setPosts] = useState([]); // State to store posts from the database
   const maxNumber = 1; //might have to change later
   const [submitButton, showSubmitButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
@@ -18,6 +18,30 @@ export default function Card(props) {
 
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
+
+  //fetch posts from the database
+  useEffect(() => {
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch("/api/posts", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await response.json();
+    if (data.success) {
+      console.log("Fetched posts:", data.data); // Add this line
+      setPosts(data.data);
+    } else {
+      console.error("Failed to fetch posts:", data.message);
+    }
+   
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+  }
+};
+
+  fetchPosts();
+}, []);
 
 
   const onChange = (imageList) => {
@@ -34,19 +58,52 @@ export default function Card(props) {
     setImages(updatedList);
   };
 //Handle image Update
-  const onImageUpdate = (index) => {
-    const updatedImages = [...submittedImages];
-    const updatedImage = prompt("Enter a new image URL:", updatedImages[index].data_url);
+  const onImageUpdate = async (index) => {
+    const updatedImage = prompt("Enter a new image URL:", posts[index].image_url);
     if (updatedImage) {
-      updatedImages[index] = { ...updatedImages[index], data_url: updatedImage };
-      setSubmittedImages(updatedImages);
+     try {
+      const response = await fetch(`/api/posts/${posts[index].id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image_url: updatedImage,
+        }),
+      });
+      const data = await response.json();
+        if (data.success) { 
+          const updatedPosts = [...posts];
+          updatedPosts[index] = { ...updatedPosts[index], image_url: updatedImage };
+          setPosts(updatedPosts);
+        } else {
+          console.error("Failed to update post:", data.message);
+        } 
+      } catch (error) {
+        console.error("Error updating post:", error);
+      }
     }
   };
 
   //Handle image Remove
-  const onImageRemove = (index) => {
-    const updatedImages = submittedImages.filter((_, i) => i !== index);
-    setSubmittedImages(updatedImages);
+  const onImageRemove = async (index) => {
+
+    try {
+      const response = await fetch(`/api/posts/${posts[index].id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const updatedPosts = posts.filter((_, i) => i !== index);
+        setPosts(updatedPosts);
+      } else {
+        console.error("Failed to delete post:", data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+    // const updatedImages = submittedImages.filter((_, i) => i !== index);
+    // setSubmittedImages(updatedImages);
   };
 
   // Update Input Fields (City, State, Caption)
@@ -57,7 +114,7 @@ export default function Card(props) {
   };
 
   //handle submit button
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const isValid = images.every(
       (image) => image.city && image.state && image.caption && image.data_url
     );
@@ -65,28 +122,92 @@ export default function Card(props) {
       alert("Please fill in all fields for each image.");
       return;
     }
-    setSubmittedImages([...submittedImages, ...images]);
-    setImages([]);
-  };
+  //   setSubmittedImages([...submittedImages, ...images]);
+  //   setImages([]);
+  // };
+  try {
+    const response = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: session?.user?.id, // Replace with the logged-in user's ID
+        caption: images[0].caption, // Example: Use caption as the title
+        content: `${images[0].city}, ${images[0].state}`, // Example: Use city and state as content
+        image_url: images[0].data_url, // Use the uploaded image URL
+      }),
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      setPosts((prev) => [data.data, ...prev]); // Add the new post to the list
+      setImages([]); // Clear the images
+      setSubmittedImages([]); // Clear submitted images
+      showSubmitButton(false); // Hide the submit button
+    } else {
+      console.error("Failed to create post:", data.message);
+    }
+  } catch (error) {
+    console.error("Error creating post:", error);
+  }
+};
+
 
   //This function checks to see if the like button has been clicked.
   // If it has, it will increment the like count by 1.
   // If it hasn't, it will decrement the like count by 1.
-  const handleClick = (index) => {
+  const handleClick = async (index) => {
+    // if (!session) {
+    //   alert("Please log in to like an image.");
+    //   return;
+    // }
+    // const updatedImages = [...submittedImages];
+    // if (updatedImages[index]) {
+    //   if (updatedImages[index].isLiked) {
+    //     updatedImages[index].like -= 1;
+    //     updatedImages[index].isLiked = false;
+    //   } else {
+    //     updatedImages[index].like += 1;
+    //     updatedImages[index].isLiked = true;
+    //   }
+    //   setSubmittedImages(updatedImages);
+    // }
+
     if (!session) {
       alert("Please log in to like an image.");
       return;
     }
-    const updatedImages = [...submittedImages];
-    if (updatedImages[index]) {
-      if (updatedImages[index].isLiked) {
-        updatedImages[index].like -= 1;
-        updatedImages[index].isLiked = false;
-      } else {
-        updatedImages[index].like += 1;
-        updatedImages[index].isLiked = true;
+  
+    const updatedPosts = [...posts];
+    const post = updatedPosts[index];
+  
+    // Toggle the like state
+    const isLiked = !post.isLiked;
+    const likeCount = isLiked ? post.like + 1 : post.like - 1;
+  
+    // Update the post locally
+    updatedPosts[index] = { ...post, isLiked, like: likeCount };
+    setPosts(updatedPosts);
+  
+    try {
+      // Send the updated like count to the backend
+      const response = await fetch(`/api/posts/${post.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isLiked, like: likeCount }),
+      });
+  
+      const data = await response.json();
+      if (!data.success) {
+        console.error("Failed to update like count:", data.message);
+        // Revert the like state if the backend update fails
+        updatedPosts[index] = { ...post };
+        setPosts(updatedPosts);
       }
-      setSubmittedImages(updatedImages);
+    } catch (error) {
+      console.error("Error updating like count:", error);
+      // Revert the like state if the request fails
+      updatedPosts[index] = { ...post };
+      setPosts(updatedPosts);
     }
   };
 
@@ -167,15 +288,19 @@ export default function Card(props) {
                     />
                     
                     {props.caption && props.caption.length < 10 && (
-                      <p className="text-red-500 text-sm">Caption must be at least 10 characters long.</p>
+                      <p className="text-red-500 text-sm">
+                        Caption must be at least 10 characters long.
+                      </p>
                     )}
 
                     {props.caption && props.caption.length > 150 && (
-                      <p className="text-red-500 text-sm"> Caption cannot exceed 150 characters.</p>
+                      <p className="text-red-500 text-sm"> 
+                      Caption cannot exceed 150 characters.
+                      </p>
                     )}
                   </div>
 
-                  {/* <div className="image-item__btn-wrapper mt-4">
+                  <div className="image-item__btn-wrapper mt-4">
                     {session && (
                       <>
                     <button
@@ -190,10 +315,9 @@ export default function Card(props) {
                     >
                       Remove
                     </button>
-                    </>)}
-                  </div> */}
-
-
+                    </>
+                  )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -202,10 +326,6 @@ export default function Card(props) {
         ) : (
        <></>
         )}
-          <div className="flex justify-center items-center">
-       
-          </div>
-        
       </div>
 
       <div className="flex justify-center my-2">
@@ -223,11 +343,12 @@ export default function Card(props) {
 
       {/* Display submitted images below*/}
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 pb-5 m-5 justify-center items-center">
-        {submittedImages.map((image, index) => (
+
+        {posts.map((post, index) => (
           <div key={index} className="card">
             <img
               className="w-64 h-64 self-center rounded-badge p-2 object-cover"
-              src={image["data_url"]}
+              src={post.image_url}
               alt="Uploaded"
             />
 
@@ -238,19 +359,23 @@ export default function Card(props) {
 
                 <div className="flex items-center justify-center gap-2">
                   <span className="text-white">📍</span>
-                  <h5 className="text-white text-sm font-bold">
-                    {image.city}, {image.state}
-                  </h5>
-                </div>
+                  <h5 className="text-white text-sm font-bold">{post.content}</h5>
+                  </div>
+                  <p 
+                  className="text-white text-sm flex items-center text-center justify-center h-20"
+                  style={{ lineHeight: "1.5rem" }}
+              >
+            {post.caption || "No caption available"}
+          </p>
+        </div>
 
                 {/* Like & Share */}
-
                 <div className="flex flex-row justify-center items-center gap-2 h-8 pb-2">
                   <div className="flex justify-start items-start mt-2">
                     <svg
                       onClick={() => handleClick(index)}
                       xmlns="http://www.w3.org/2000/svg"
-                      fill={image.isLiked ? "red" : "none"}
+                      fill={post.isLiked ? "red" : "none"}
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
@@ -263,7 +388,7 @@ export default function Card(props) {
                       />
                     </svg>
 
-                  {image.like > 0 && <span className="text-white">{image.like}</span>}
+                  {post.like > 0 && <span className="text-white">{post.like}</span>}
                   </div>
 
                   {/* share icon*/}
@@ -275,50 +400,48 @@ export default function Card(props) {
                           <ClickAwayListener
                           mouseEvent="onMouseDown"
                           touchEvent="onTouchStart"
-                          onClickAway={closeShareModal}>
+                          onClickAway={closeShareModal}
+                          >
                         {/* This SocialShareMedia icon is a modal that opens when the share icon is clicked */}
                         {/* It contains the share options for the image */}
 
-                          <SocialShareMedia isOpen={isShareModalOpen} onClose={closeShareModal} />
-
+                          <SocialShareMedia 
+                            isOpen={isShareModalOpen} 
+                            onClose={closeShareModal} 
+                            />
                       </ClickAwayListener>
-
                     </div>
                   </div>
-                  <div className="image-item__btn-wrapper mt-4">
-                    {session && (
-                      <>
-                    <button
-                      className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
-                      onClick={() => onImageUpdate(index)}
-                    >
-                      Update
-                    </button>
-                    <button
-                      className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
-                      onClick={() => onImageRemove(index)}
-                    >
-                      Remove
-                    </button>
-                    </>)}
-                  </div>
-
-                </div>
-
-
-                {/* Caption */}
-                <p className="text-white text-sm flex items-center text-center justify-center h-20"
-                style={{ lineHeight: "1.5rem" }}
-                >
-                  {image.caption}
-                </p>
-
               </div>
-            </div>
+              </div>
         ))}
-      </div>
-
-
-    </div>
+        </div>
+        </div>
   );
-}
+}          
+
+
+//                   <div className="image-item__btn-wrapper mt-4">
+//                     {session && (
+//                       <>
+//                     <button
+//                       className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+//                       onClick={() => onImageUpdate(index)}
+//                     >
+//                       Update
+//                     </button>
+//                     <button
+//                       className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+//                       onClick={() => onImageRemove(index)}
+//                     >
+//                       Remove
+//                     </button>
+//                     </>)}
+//                   </div>
+
+               
+
+//             </div>
+//   );
+// } 
+

@@ -3,7 +3,7 @@ import pool from "../../../src/app/databaseConnection/db";
 // Get all users
 export async function GET() {
   try {
-    const result = await pool.query(`SELECT id, username, email, oauth_provider,
+    const result = await pool.query(`SELECT id, name, email, oauth_provider,
                    oauth_id, profile_picture, created_at 
             FROM users`);
 
