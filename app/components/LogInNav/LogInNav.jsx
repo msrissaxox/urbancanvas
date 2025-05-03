@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { signIn } from "next-auth/react";
 
 import Header from "./Header";
 
@@ -33,16 +34,11 @@ export default function LogInNav({ loginLink, registerLink }) {
         className={`w-full lg:flex lg:items-center lg:w-auto ${isOpen ? "block" : "hidden"}`}
       >
         <div className="flex flex-col items-center lg:flex-row lg:space-x-4 w-full lg:w-auto">
-          <a href={loginLink}
-            className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
-          >
-            Log In
-          </a>
-          <a href={registerLink}
-            className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
-          >
-            Register
-          </a>
+        <button className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+         onClick={() => signIn('google')}>
+  Log in with Google
+</button>
+          
         </div>
       </div>
     </nav>
