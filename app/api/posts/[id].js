@@ -2,27 +2,36 @@ import pool from '../../../src/app/databaseConnection/db'; // Adjust the path if
 
 export async function GET(request, { params }) {
   const { id } = params;
+  console.log("Fetching post details for ID:", id);
+
 
   try {
-    const result = await pool.query(
-      `SELECT p.*, u.name, u.profile_picture 
-       FROM posts p
-       JOIN users u ON p.user_id = u.id
-       WHERE p.id = $1`,
+    const postResult = await pool.query(
+      `SELECT * FROM posts WHERE id = $1`,
       [id]
     );
 
-    if (result.rows.length === 0) {
+if (postResult.rows.length === 0) {
+      console.log("Post not found for ID:", id);
       return new Response(JSON.stringify({ message: 'Post not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
+    const post = postResult.rows[0];
+
+// Fetch the total likes for the post
+    const likeResult = await pool.query(
+      `SELECT COUNT(*) AS like_count FROM likes WHERE post_id = $1`,
+      [id]
+    );
+
+    const likeCount = parseInt(likeResult.rows[0].like_count, 10);
 
     return new Response(
       JSON.stringify({
         success: true,
-        data: result.rows[0],
+        data: { ...post, like: likeCount },
       }),
       {
         status: 200,
@@ -30,7 +39,7 @@ export async function GET(request, { params }) {
       }
     );
   } catch (error) {
-    console.error('Error fetching post:', error);
+    console.error('Error fetching post details:', error);
     return new Response(
       JSON.stringify({ message: 'Internal server error' }),
       {
@@ -40,47 +49,62 @@ export async function GET(request, { params }) {
     );
   }
 }
+
 
 // Handle PUT request to update the like count and isLiked state
 export async function PUT(request, { params }) {
   const { id } = params;
+  console.log("Received PUT request for post ID:", id);
 
-  try {
-    const { isLiked, like } = await request.json();
-
-    const result = await pool.query(
-      `UPDATE posts 
-       SET is_liked = $1, like_count = $2 
-       WHERE id = $3 
-       RETURNING *`,
-      [isLiked, like, id]
-    );
-
-    if (result.rows.length === 0) {
-      return new Response(JSON.stringify({ message: 'Post not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+  export async function PUT(request, { params }) {
+    const { id } = params;
+    console.log("Received PUT request for post ID:", id);
+  
+    try {
+      const { isLiked, user_id } = await request.json();
+      console.log("Request body for PUT:", { isLiked, user_id });
+  
+      if (isLiked) {
+        // Add a like
+        await pool.query(
+          `INSERT INTO likes (user_id, post_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+          [user_id, id]
+        );
+      } else {
+        // Remove a like
+        await pool.query(
+          `DELETE FROM likes WHERE user_id = $1 AND post_id = $2`,
+          [user_id, id]
+        );
+      }
+  
+      // Fetch the updated like count
+      const likeResult = await pool.query(
+        `SELECT COUNT(*) AS like_count FROM likes WHERE post_id = $1`,
+        [id]
+      );
+  
+      const likeCount = parseInt(likeResult.rows[0].like_count, 10);
+  
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: { post_id: id, like: likeCount },
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    } catch (error) {
+      console.error('Error updating like count:', error);
+      return new Response(
+        JSON.stringify({ message: 'Internal server error' }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data: result.rows[0],
-      }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  } catch (error) {
-    console.error('Error updating post:', error);
-    return new Response(
-      JSON.stringify({ message: 'Internal server error' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }
-}
+  } 
+  

@@ -172,25 +172,29 @@ export default function Card(props) {
 
     // Toggle the like state
     const isLiked = !post.isLiked;
-    const likeCount = isLiked ? post.like + 1 : post.like - 1;
 
-    // Update the post locally
-    updatedPosts[index] = { ...post, isLiked, like: likeCount };
+
+    updatedPosts[index] = { ...post, isLiked };
     setPosts(updatedPosts);
+
 
     try {
       // Send the updated like count to the backend
       const response = await fetch(`/api/posts/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isLiked, like: likeCount }),
+        body: JSON.stringify({ isLiked, user_id: session.user.id }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      // Check the response from the backend
       const data = await response.json();
       if (!data.success) {
         console.error("Failed to update like count:", data.message);
         // Revert the like state if the backend update fails
-        updatedPosts[index] = { ...post };
+        updatedPosts[index] = { ...post, like: data.data.like };
         setPosts(updatedPosts);
       }
     } catch (error) {
@@ -200,6 +204,8 @@ export default function Card(props) {
       setPosts(updatedPosts);
     }
   };
+
+
 
   return (
     <div>
