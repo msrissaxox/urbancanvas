@@ -1,5 +1,35 @@
 import pool from "../../../src/app/databaseConnection/db";
 
+//test the connection
+export async function GET() {
+  try {
+    console.log("Fetching likes...");
+    // console.log("Likes table data:", result.rows); 
+
+    const result = await pool.query("SELECT * FROM likes");
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Likes fetched successfully",
+        data: result.rows,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.error("Error fetching likes:", error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: "Failed to fetch likes",
+        error: error.message,
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+}
+
+
 // POST /api/likes
 export async function POST(request) {
   try {
