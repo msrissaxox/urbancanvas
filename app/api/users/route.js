@@ -1,12 +1,13 @@
 import pool from "../../../src/app/databaseConnection/db";
 
 // Get all users
-export async function GET() {
+export async function GET(req) {
   try {
-    const result = await pool.query(`SELECT id, name, email, oauth_provider,
-                   oauth_id, profile_picture, created_at 
-            FROM users`);
+    console.log("Fetching users...");
 
+    const result = await pool.query("SELECT * FROM users");
+    console.log("Users result:", result.rows);
+   
     return new Response(
       JSON.stringify({
         success: true,

@@ -1,12 +1,12 @@
 import pool from "../../../src/app/databaseConnection/db";
 
 //test the connection
-export async function GET() {
+export async function GET(req) {
   try {
     console.log("Fetching likes...");
-    // console.log("Likes table data:", result.rows); 
 
     const result = await pool.query("SELECT * FROM likes");
+    console.log("Likes result:", result.rows);
 
     return new Response(
       JSON.stringify({

@@ -16,41 +16,76 @@ export default function Card(props) {
   const [uploadButton, showUploadButton] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
+
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
 
   //fetch posts from the database
   useEffect(() => {
-    const fetchPosts = async () => {
+    const fetchPostsandLikesandUsers = async () => {
       try {
-        const response = await fetch("/api/posts", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        const data = await response.json();
-        console.log("API Response:", data);
-        if (data.success) {
-          console.log("Fetched posts:", data.data); // Add this line
-          setPosts(data.data);
-        } else {
-          console.error(
-            "Failed to fetch posts:",
-            data.message || "No error message"
-          );
+        //Get the posts from the database
+        const postResponse = await fetch("/api/posts"); 
+        const postsData = await postResponse.json();
+        if(!postsData.success) {
+          console.error("Failed to fetch posts:", postsData.message);
+          return;
         }
+        //Get the likes from the database
+        const likeResponse = await fetch("/api/likes");
+        const likesData = await likeResponse.json();
+        if(!likesData.success) {
+          console.error("Failed to fetch likes:", likesData.message);
+          return;
+        }
+
+        const userResponse = await fetch("/api/users");
+        const usersData = await userResponse.json();
+        if(!usersData.success) {
+          console.error("Failed to fetch users:", usersData.message);
+          return;
+        }
+
+        //merge the posts, likes and users data
+        const mergedPosts = postsData.data.map((post) => {
+        const likeData = likesData.data.find(
+            (like) => like.post_id === post.id && like.user_id === session.user.id
+          );
+          const user = usersData.data.find((user) => user.id === post.user_id);
+          if (!user) {
+            console.error("User not found for post:", post.id);
+            return null; // Skip this post if user is not found
+          }
+
+
+          return {
+            ...post,
+            isLiked: !!likeData,
+            like: likesData.data.filter((like) => like.post_id === post.id).length,
+            user,
+          };
+        });
+        setPosts(mergedPosts);
       } catch (error) {
-        console.error("Error fetching posts:", error);
+        console.error("Error fetching posts and likes:", error);
       }
     };
 
-    fetchPosts();
-  }, []);
+    if (session) {
+      fetchPostsandLikesandUsers();
+    }
+   }, [session]);
+  
+
+
+
+
 
   const onChange = (imageList) => {
     const updatedList = imageList.map((props, index) => ({
       ...images[index], // Preserve existing city, state, and caption if already set
       ...props,
-
+      // userName: session?.user?.name || "",
       city: images[index]?.city || "",
       state: images[index]?.state || "",
       caption: images[index]?.caption || "",
@@ -157,6 +192,17 @@ export default function Card(props) {
       console.error("Error creating post:", error);
     }
   };
+
+
+
+
+
+
+
+
+
+
+
 
   //This function checks to see if the like button has been clicked.
   // If it has, it will increment the like count by 1.
@@ -341,7 +387,9 @@ export default function Card(props) {
               src={post.image_url}
               alt="Uploaded"
             />
-
+       <span className="text-white text-xs font-semibold">
+      {post.user?.name}
+    </span>
             <div className="p-1">
               {/* Location and Actions Row */}
               <div className="flex flex-col justify-between w-full mb-2">
@@ -361,7 +409,7 @@ export default function Card(props) {
               </div>
 
               {/* Like & Share */}
-              <div className="flex flex-row justify-center items-center gap-2 h-8 pb-2">
+              <div className="flex flex-row justify-center items-center gap-2 h-7">
                 <div className="flex justify-start items-start mt-2">
                   <svg
                     onClick={() => handleClick(index)}
@@ -412,5 +460,5 @@ export default function Card(props) {
     </div>
   );
 }
+ 
 
-// }
