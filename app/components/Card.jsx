@@ -51,20 +51,19 @@ export default function Card(props) {
         const likeData = likesData.data.find(
             (like) => like.post_id === post.id && like.user_id === session.user.id
           );
-          const user = usersData.data.find((user) => user.id === post.user_id);
-          if (!user) {
-            console.error("User not found for post:", post.id);
-            return null; // Skip this post if user is not found
-          }
-
-
+        const user = usersData.data.find(
+          (user) => String(user.id) === String(post.user_id)
+        );
           return {
             ...post,
             isLiked: !!likeData,
             like: likesData.data.filter((like) => like.post_id === post.id).length,
             user,
           };
-        });
+        })
+              console.log("mergedPosts", mergedPosts);
+
+      
         setPosts(mergedPosts);
       } catch (error) {
         console.error("Error fetching posts and likes:", error);
@@ -233,6 +232,8 @@ export default function Card(props) {
       });
 
       if (!response.ok) {
+          console.error("Request failed:", response.url, response.status);
+
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       // Check the response from the backend
@@ -387,9 +388,13 @@ export default function Card(props) {
               src={post.image_url}
               alt="Uploaded"
             />
-       <span className="text-white text-xs font-semibold">
-      {post.user?.name}
-    </span>
+<span className="text-white text-xs font-semibold flex items-center justify-center">
+  {post.user_name}
+</span>
+
+       {/* <span className="text-white text-xs font-semibold">
+      {post.users?.name}
+    </span> */}
             <div className="p-1">
               {/* Location and Actions Row */}
               <div className="flex flex-col justify-between w-full mb-2">
