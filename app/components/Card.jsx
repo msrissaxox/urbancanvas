@@ -16,7 +16,7 @@ export default function Card(props) {
   const [uploadButton, showUploadButton] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-
+//Modal for share button
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
 
@@ -25,6 +25,7 @@ export default function Card(props) {
     const fetchPostsandLikesandUsers = async () => {
       try {
         //Get the posts from the database
+        console.log("session.user.id", session.user.id);
         const postResponse = await fetch("/api/posts"); 
         const postsData = await postResponse.json();
         if(!postsData.success) {
@@ -62,6 +63,7 @@ export default function Card(props) {
             ...post,
             isLiked: !!likesData,
             like: likesData.data.filter((like) => like.post_id === post.id).length,
+            //what to put here to get this to populate?
             user,
           };
         })
@@ -79,15 +81,11 @@ export default function Card(props) {
    }, [session]);
   
 
-
-
-
-
   const onChange = (imageList) => {
     const updatedList = imageList.map((props, index) => ({
       ...images[index], // Preserve existing city, state, and caption if already set
       ...props,
-      // userName: session?.user?.name || "",
+      userName: session?.user?.name || "",
       city: images[index]?.city || "",
       state: images[index]?.state || "",
       caption: images[index]?.caption || "",
@@ -160,8 +158,11 @@ export default function Card(props) {
   //handle submit button
   const handleSubmit = async () => {
     const isValid = images.every(
+      // (image) => image.city && image.state && image.caption && image.data_url
       (image) => image.city && image.state && image.caption && image.data_url
+
     );
+    console.log("images", images)
     if (!isValid) {
       alert("Please fill in all fields for each image.");
       return;
@@ -176,8 +177,11 @@ export default function Card(props) {
         body: JSON.stringify({
           user_id: session?.user?.id, // Replace with the logged-in user's ID
           caption: images[0].caption, // Example: Use caption as the title
-          content: `${images[0].city}, ${images[0].state}`, // Example: Use city and state as content
+          city: images[0].city, 
+          state: images[0].state,
           image_url: images[0].data_url, // Use the uploaded image URL
+          // image_url: images[0].image_url, // Use the uploaded image URL
+
         }),
       });
 
@@ -266,6 +270,7 @@ export default function Card(props) {
             value={images}
             onChange={onChange}
             maxNumber={maxNumber}
+            // dataURLKey="data_url"
             dataURLKey="data_url"
           >
             {({ imageList, onImageUpload, isDragging, dragProps }) => (
@@ -392,7 +397,7 @@ export default function Card(props) {
               alt="Uploaded"
             />
 <span className="text-white text-xs font-semibold flex items-center justify-center">
-  {post.user_name}
+  {post.user.name}
 </span>
 
        {/* <span className="text-white text-xs font-semibold">
@@ -403,7 +408,7 @@ export default function Card(props) {
               <div className="flex flex-col justify-between w-full mb-2">
                 {/*Location */}
 
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-1">
                   <span className="text-white">📍</span>
                   <h5 className="text-white text-sm font-bold">{post.city},</h5>
                   <h5 className="text-white text-sm font-bold">{post.state}</h5>

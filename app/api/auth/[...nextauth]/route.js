@@ -69,25 +69,31 @@ export const authOptions = {
     if (dbUser && dbUser.name === "New User") {
       return "/auth/new-user";
     }
+  //     const dbUser = await findOrCreateUser({ user, account, profile });
+  // user.id = dbUser.id; // <-- ensure user.id is your DB UUID
+  // user.name = dbUser.name;
+  // user.email = dbUser.email;
+  // user.image = dbUser.image;
+  // if (dbUser && dbUser.name === "New User") {
+  //   return "/auth/new-user";
+  // }
     return true;
   },
-
-      async session({ session, token }) {
-        if (token) {
-          session.user.id = token.sub;
-          // Add any additional user data you want in session
-        }
-        return session;
-      },
-
-      
-      
+            
       async jwt({ token, user }) {
         if (user) {
           token.id = user.id;
           // Add any additional user data you want in JWT
         }
         return token;
+      },
+
+      async session({ session, token }) {
+        if (token?.id) {
+          session.user.id = token.id;
+          // Add any additional user data you want in session
+        }
+        return session;
       }
     },
 
