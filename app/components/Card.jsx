@@ -48,15 +48,19 @@ export default function Card(props) {
 
         //merge the posts, likes and users data
         const mergedPosts = postsData.data.map((post) => {
+          let isLiked = false;
+          if (session) {
         const likeData = likesData.data.find(
             (like) => like.post_id === post.id && like.user_id === session.user.id
           );
+          isLiked = !!likeData;
+        }
         const user = usersData.data.find(
           (user) => String(user.id) === String(post.user_id)
         );
           return {
             ...post,
-            isLiked: !!likeData,
+            isLiked: !!likesData,
             like: likesData.data.filter((like) => like.post_id === post.id).length,
             user,
           };
@@ -70,9 +74,8 @@ export default function Card(props) {
       }
     };
 
-    if (session) {
       fetchPostsandLikesandUsers();
-    }
+    
    }, [session]);
   
 

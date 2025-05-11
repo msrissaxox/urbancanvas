@@ -1,14 +1,10 @@
-import pool from "../../../src/app/databaseConnection/db"; // Adjust the path if needed
+import pool from "@lib/databaseConnection/db"; // Adjust the path if needed
 
 export async function GET(req) {
   try {
     console.log("Fetching posts...");
     const result = await pool.query(
-      `SELECT p.id, p.caption, p.city, p.state, p.created_at, p.image_url, 
-              u.name AS user_name, u.image AS profile_picture 
-       FROM posts p
-       JOIN users u ON p.user_id = u.id
-       ORDER BY p.created_at DESC`
+      "SELECT * FROM posts ORDER BY created_at DESC"
     );
     console.log("Query result:", result.rows);
 

@@ -10,7 +10,7 @@
   "compilerOptions": {
     "baseUrl": ".", // Ensures paths are resolved relative to the project root
     "paths": {
-      "@lib/*": ["./src/lib/*"] // Maps @lib to the src/lib directory
+      "@lib/*": ["./src/app/*"] // Maps @lib to the src/app directory
     }
   }
 }
