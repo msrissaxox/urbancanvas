@@ -1,4 +1,4 @@
-import pool from '../../../src/app/databaseConnection/db'; // Adjust the path if needed
+import pool from '@lib/databaseConnection/db'; // Adjust the path if needed
 
 export async function GET(request, { params }) {
   const { id } = params;
@@ -56,9 +56,6 @@ export async function PUT(request, { params }) {
   const { id } = params;
   console.log("Received PUT request for post ID:", id);
 
-  export async function PUT(request, { params }) {
-    const { id } = params;
-    console.log("Received PUT request for post ID:", id);
   
     try {
       const { isLiked, user_id } = await request.json();
@@ -106,5 +103,5 @@ export async function PUT(request, { params }) {
         }
       );
     }
-  } 
+  }
   

@@ -25,9 +25,11 @@ export default function Card(props) {
     const fetchPostsandLikesandUsers = async () => {
       try {
         //Get the posts from the database
-        console.log("session.user.id", session.user.id);
+        // console.log("session.user.id", session.user.id);
         const postResponse = await fetch("/api/posts"); 
         const postsData = await postResponse.json();
+
+        console.log("postsData", postsData); 
         if(!postsData.success) {
           console.error("Failed to fetch posts:", postsData.message);
           return;
@@ -171,17 +173,20 @@ export default function Card(props) {
     //   setImages([]);
     // };
     try {
+      console.log("submitting post", images[0]);
+      // Send the image data to the backend
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: session?.user?.id, // Replace with the logged-in user's ID
-          caption: images[0].caption, // Example: Use caption as the title
+                    // user_id: session?.user?.oauth_id, // Use oauth_id here
+
+          caption: images[0].caption, 
           city: images[0].city, 
           state: images[0].state,
           image_url: images[0].data_url, // Use the uploaded image URL
           // image_url: images[0].image_url, // Use the uploaded image URL
-
         }),
       });
 
@@ -397,7 +402,7 @@ export default function Card(props) {
               alt="Uploaded"
             />
 <span className="text-white text-xs font-semibold flex items-center justify-center">
-  {post.user.name}
+  {post.user ? post.user.name : "Unknown User"}
 </span>
 
        {/* <span className="text-white text-xs font-semibold">

@@ -36,12 +36,15 @@ export async function GET(req) {
   }
 }
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const { user_id, caption, city, state, image_url } = await request.json();
+    const body = await req.json();
+    console.log("POST /api/posts body:", body); 
+
+    const { user_id: oauth_id, caption, city, state, image_url } = body;
 
     // Validate required fields
-    if (!user_id || !caption || !city || !state || !image_url) {
+    if (!oauth_id || !caption || !city || !state || !image_url) {
       return new Response(
         JSON.stringify({ message: "All fields are required" }),
         {
@@ -51,11 +54,34 @@ export async function POST(request) {
       );
     }
 
+    // const result = await pool.query(
+  //     `INSERT INTO posts (user_id, caption, city, state, image_url, created_at)
+  //  VALUES ($1, $2, $3, $4, $5, NOW())
+  //  RETURNING *`,
+  //     [user_id, caption, city, state, image_url]
+  //   );
+    const userResult = await pool.query(
+      `SELECT id FROM users WHERE oauth_id = $1`,
+      [oauth_id]
+    );
+     if (userResult.rows.length === 0) {
+      return new Response(
+        JSON.stringify({ message: "User not found" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+        const user_uuid = userResult.rows[0].id;
+
+
     const result = await pool.query(
       `INSERT INTO posts (user_id, caption, city, state, image_url, created_at)
    VALUES ($1, $2, $3, $4, $5, NOW())
    RETURNING *`,
-      [user_id, caption, city, state, image_url]
+      [user_uuid, caption, city, state, image_url]
     );
 
     return new Response(
