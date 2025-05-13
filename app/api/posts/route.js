@@ -1,6 +1,6 @@
 import pool from "@lib/databaseConnection/db"; // Adjust the path if needed
 
-export async function GET(req) {
+export async function GET() {
   try {
     console.log("Fetching posts...");
     const result = await pool.query(

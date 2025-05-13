@@ -1,7 +1,7 @@
-import pool from "../../../src/app/databaseConnection/db";
+import pool from "@lib/databaseConnection/db";
 
 // Get all users
-export async function GET(req) {
+export async function GET() {
   try {
     console.log("Fetching users...");
 
@@ -40,6 +40,8 @@ export async function GET(req) {
 }
 
 // Create new user
+//Do i have a double check for the user already exists?
+
 export async function POST(request) {
   try {
     const body = await request.json();
@@ -120,6 +122,12 @@ export async function POST(request) {
   }
 }
 
+
+
+
+
+
+//Do i even need this here?? Not yet...
 // Update user profile picture
 export async function PATCH(request) {
   try {

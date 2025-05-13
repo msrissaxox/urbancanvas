@@ -38,7 +38,7 @@ const id =
               image, 
               account.provider, 
               profile?.sub || profile?.id || null,
-    profile?.email_verified ? new Date(profile.email_verified) : null
+              profile?.email_verified ? new Date(profile.email_verified) : null
             ]
           );
       
@@ -66,9 +66,9 @@ export const authOptions = {
   async signIn({ user, account, profile }) {
     const dbUser = await findOrCreateUser({ user, account, profile });
     // If this is a new user, redirect to new user page
-    if (dbUser && dbUser.name === "New User") {
-      return "/auth/new-user";
-    }
+    // if (dbUser && dbUser.name === "New User") {
+    //   return "/auth/new-user";
+    // }
   //     const dbUser = await findOrCreateUser({ user, account, profile });
   // user.id = dbUser.id; // <-- ensure user.id is your DB UUID
   // user.name = dbUser.name;
@@ -104,7 +104,7 @@ export const authOptions = {
       signIn: '/auth/signin',
       signOut: '/auth/signout',
       error: '/auth/error',
-      newUser: '/auth/new-user',
+      // newUser: '/auth/new-user',
     },
     session: {
       strategy: "jwt",

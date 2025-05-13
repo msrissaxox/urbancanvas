@@ -230,17 +230,22 @@ export default function Card(props) {
     // Toggle the like state
     const isLiked = !post.isLiked;
 
-
     updatedPosts[index] = { ...post, isLiked };
     setPosts(updatedPosts);
 
-
     try {
       // Send the updated like count to the backend
+      console.log("Sending like update:", {
+        post_id: post.id, //1b77038a-4355 etc PK
+        user_id: session.user.id, //11701069 etc
+        id: post.id, // 1b77038a-4355 etc PK
+        isLiked,
+      });
       const response = await fetch(`/api/posts/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isLiked, user_id: session.user.id }),
+        body: JSON.stringify({ isLiked, user_id: session.user.id 
+          }),
       });
 
       if (!response.ok) {

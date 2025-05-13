@@ -1,7 +1,7 @@
-import pool from "../../../src/app/databaseConnection/db";
+import pool from "@lib/databaseConnection/db";
 
 //test the connection
-export async function GET(req) {
+export async function GET() {
   try {
     console.log("Fetching likes...");
 
