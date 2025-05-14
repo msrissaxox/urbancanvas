@@ -1,3 +1,4 @@
+//posts routes
 import pool from "@lib/databaseConnection/db"; // Adjust the path if needed
 
 export async function GET() {

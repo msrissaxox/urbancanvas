@@ -204,17 +204,6 @@ export default function Card(props) {
     }
   };
 
-
-
-
-
-
-
-
-
-
-
-
   //This function checks to see if the like button has been clicked.
   // If it has, it will increment the like count by 1.
   // If it hasn't, it will decrement the like count by 1.
@@ -244,9 +233,11 @@ export default function Card(props) {
       const response = await fetch(`/api/posts/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isLiked, user_id: session.user.id 
-          }),
-      });
+body: JSON.stringify({
+  post_id: post.id,
+  user_id: session.user.id,
+  isLiked,
+}),      });
 
       if (!response.ok) {
           console.error("Request failed:", response.url, response.status);

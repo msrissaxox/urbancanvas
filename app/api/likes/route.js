@@ -1,6 +1,5 @@
 import pool from "@lib/databaseConnection/db";
 
-//test the connection
 export async function GET() {
   try {
     console.log("Fetching likes...");
