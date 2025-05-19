@@ -16,7 +16,7 @@ export default function Card(props) {
   const [uploadButton, showUploadButton] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-//Modal for share button
+  //Modal for share button
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
 
@@ -26,25 +26,25 @@ export default function Card(props) {
       try {
         //Get the posts from the database
         // console.log("session.user.id", session.user.id);
-        const postResponse = await fetch("/api/posts"); 
+        const postResponse = await fetch("/api/posts");
         const postsData = await postResponse.json();
 
-        console.log("postsData", postsData); 
-        if(!postsData.success) {
+        console.log("postsData", postsData);
+        if (!postsData.success) {
           console.error("Failed to fetch posts:", postsData.message);
           return;
         }
         //Get the likes from the database
         const likeResponse = await fetch("/api/likes");
         const likesData = await likeResponse.json();
-        if(!likesData.success) {
+        if (!likesData.success) {
           console.error("Failed to fetch likes:", likesData.message);
           return;
         }
 
         const userResponse = await fetch("/api/users");
         const usersData = await userResponse.json();
-        if(!usersData.success) {
+        if (!usersData.success) {
           console.error("Failed to fetch users:", usersData.message);
           return;
         }
@@ -53,35 +53,35 @@ export default function Card(props) {
         const mergedPosts = postsData.data.map((post) => {
           let isLiked = false;
           if (session) {
-        const likeData = likesData.data.find(
-            (like) => like.post_id === post.id && like.user_id === session.user.id
+            const likeData = likesData.data.find(
+              (like) =>
+                like.post_id === post.id && like.user_id === session.user.id
+            );
+            isLiked = !!likeData;
+          }
+          const user = usersData.data.find(
+            (user) => String(user.id) === String(post.user_id)
           );
-          isLiked = !!likeData;
-        }
-        const user = usersData.data.find(
-          (user) => String(user.id) === String(post.user_id)
-        );
           return {
             ...post,
-            isLiked: !!likesData,
-            like: likesData.data.filter((like) => like.post_id === post.id).length,
+            isLiked,
+            like: likesData.data.filter((like) => like.post_id === post.id)
+              .length,
             //what to put here to get this to populate?
             user,
           };
-        })
-              console.log("mergedPosts", mergedPosts);
+        });
+        console.log("mergedPosts", mergedPosts);
+     
 
-      
         setPosts(mergedPosts);
       } catch (error) {
         console.error("Error fetching posts and likes:", error);
       }
     };
 
-      fetchPostsandLikesandUsers();
-    
-   }, [session]);
-  
+    fetchPostsandLikesandUsers();
+  }, [session]);
 
   const onChange = (imageList) => {
     const updatedList = imageList.map((props, index) => ({
@@ -162,9 +162,8 @@ export default function Card(props) {
     const isValid = images.every(
       // (image) => image.city && image.state && image.caption && image.data_url
       (image) => image.city && image.state && image.caption && image.data_url
-
     );
-    console.log("images", images)
+    console.log("images", images);
     if (!isValid) {
       alert("Please fill in all fields for each image.");
       return;
@@ -179,11 +178,11 @@ export default function Card(props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: session?.user?.id, // Replace with the logged-in user's ID
-                    // user_id: session?.user?.oauth_id, // Use oauth_id here
+          user_id: session.user.id, // Replace with the logged-in user's ID
+          // user_id: session?.user?.oauth_id, // Use oauth_id here
 
-          caption: images[0].caption, 
-          city: images[0].city, 
+          caption: images[0].caption,
+          city: images[0].city,
           state: images[0].state,
           image_url: images[0].data_url, // Use the uploaded image URL
           // image_url: images[0].image_url, // Use the uploaded image URL
@@ -212,7 +211,7 @@ export default function Card(props) {
       alert("Please log in to like an image.");
       return;
     }
-
+    console.log("user_id being sent:", session.user.id);
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
 
@@ -233,14 +232,14 @@ export default function Card(props) {
       const response = await fetch(`/api/posts/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-  post_id: post.id,
-  user_id: session.user.id,
-  isLiked,
-}),      });
+        body: JSON.stringify({
+          user_id: session.user.id,
+          isLiked,
+        }),
+      });
 
       if (!response.ok) {
-          console.error("Request failed:", response.url, response.status);
+        console.error("Request failed:", response.url, response.status);
 
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -259,8 +258,6 @@ body: JSON.stringify({
       setPosts(updatedPosts);
     }
   };
-
-
 
   return (
     <div>
@@ -397,11 +394,11 @@ body: JSON.stringify({
               src={post.image_url}
               alt="Uploaded"
             />
-<span className="text-white text-xs font-semibold flex items-center justify-center">
-  {post.user ? post.user.name : "Unknown User"}
-</span>
+            <span className="text-white text-xs font-semibold flex items-center justify-center">
+              {post.user ? post.user.name : "Unknown User"}
+            </span>
 
-       {/* <span className="text-white text-xs font-semibold">
+            {/* <span className="text-white text-xs font-semibold">
       {post.users?.name}
     </span> */}
             <div className="p-1">
@@ -474,5 +471,3 @@ body: JSON.stringify({
     </div>
   );
 }
- 
-

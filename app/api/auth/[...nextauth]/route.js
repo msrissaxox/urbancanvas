@@ -65,6 +65,7 @@ export const authOptions = {
     callbacks: {
   async signIn({ user, account, profile }) {
     const dbUser = await findOrCreateUser({ user, account, profile });
+    user.id = dbUser.id; // dbUser.id is your UUID from the database
     // If this is a new user, redirect to new user page
     // if (dbUser && dbUser.name === "New User") {
     //   return "/auth/new-user";
@@ -81,18 +82,17 @@ export const authOptions = {
   },
             
       async jwt({ token, user }) {
-        if (user) {
+        if (user) 
           token.id = user.id;
           // Add any additional user data you want in JWT
-        }
         return token;
       },
 
       async session({ session, token }) {
-        if (token?.id) {
+        if (token?.id) 
           session.user.id = token.id;
           // Add any additional user data you want in session
-        }
+        
         return session;
       }
     },

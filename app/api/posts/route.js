@@ -1,5 +1,14 @@
 //posts routes
-import pool from "@lib/databaseConnection/db"; // Adjust the path if needed
+//Common HTTP methods here are:
+
+//GET: To fetch details of a single post. DONE
+//PUT: To update an existing post. DONE
+//DELETE: To delete a specific post.
+
+
+import pool from '@lib/databaseConnection/db'; // Adjust the path if needed
+
+// Handle PUT request to update the like count and isLiked state
 
 export async function GET() {
   try {
@@ -37,6 +46,8 @@ export async function GET() {
   }
 }
 
+
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -55,12 +66,6 @@ export async function POST(req) {
       );
     }
 
-    // const result = await pool.query(
-  //     `INSERT INTO posts (user_id, caption, city, state, image_url, created_at)
-  //  VALUES ($1, $2, $3, $4, $5, NOW())
-  //  RETURNING *`,
-  //     [user_id, caption, city, state, image_url]
-  //   );
     const userResult = await pool.query(
       `SELECT id FROM users WHERE oauth_id = $1`,
       [oauth_id]
@@ -76,8 +81,6 @@ export async function POST(req) {
     }
 
         const user_uuid = userResult.rows[0].id;
-
-
     const result = await pool.query(
       `INSERT INTO posts (user_id, caption, city, state, image_url, created_at)
    VALUES ($1, $2, $3, $4, $5, NOW())
