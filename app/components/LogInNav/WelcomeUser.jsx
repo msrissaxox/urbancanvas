@@ -18,14 +18,12 @@ export default function WelcomeUser() {
     <div>
       {session ? (
         <>
-          <h2 className="alumniSansPinstripe text-stone-100 text-xl">
-            Welcome, {firstName || "guest! Please log in."}
+          <h2 className="alumniSansPinstripe text-stone-100 text-2xl">
+            Welcome, {firstName ? `${firstName}` : 'Guest! Please log in.'}
           </h2>
-          {/* <h2>Welcome, guest! Please log in.</h2> */}
         </>
       ) : (
         <>
-          <h2>Welcome, guest! Please log in.</h2>
         </>
       )}
     </div>

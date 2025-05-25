@@ -14,7 +14,7 @@ export default function LogInNav() {
     <nav className="flex items-center justify-between flex-wrap bg-gradient-to-tl from-stone-900 to-stone-600 p-6">
     
     <Header />
-    <WelcomeUser />
+
       {/* Mobile Menu Button */}
       <div className="block lg:hidden">
         <button
@@ -39,6 +39,7 @@ export default function LogInNav() {
         <div className="flex flex-col items-center lg:flex-row lg:space-x-4 w-full lg:w-auto">
 {session ? (  
   <>
+<WelcomeUser />
 <LogoutButton />
 </>
 ) : (
