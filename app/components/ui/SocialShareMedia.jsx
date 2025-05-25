@@ -76,12 +76,7 @@ const handleSnackbarClose = () => setSnackbarOpen(false);
     touchEvent="onTouchStart"
     onClickAway={onClose}>
     <div>
-    
-      {/* <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <IconButton onClick={() => onClose(false)} aria-label="Open social share options">
-           <ShareIcon />
-        </IconButton> 
-      </Stack> */}
+ 
 
       <Modal 
       open={isOpen} 

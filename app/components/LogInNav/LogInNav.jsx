@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Header from "./Header";
 import LoginButton from "./LoginBtn";
 import LogoutButton from "./LogoutBtn";
+import WelcomeUser from "./WelcomeUser";
 
 export default function LogInNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,8 +12,9 @@ export default function LogInNav() {
 
   return (
     <nav className="flex items-center justify-between flex-wrap bg-gradient-to-tl from-stone-900 to-stone-600 p-6">
-      <Header />
-
+    
+    <Header />
+    <WelcomeUser />
       {/* Mobile Menu Button */}
       <div className="block lg:hidden">
         <button

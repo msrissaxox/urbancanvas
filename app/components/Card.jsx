@@ -15,7 +15,7 @@ export default function Card(props) {
   const [submitButton, showSubmitButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-
+  const [likeCount, setLikeCount] = useState("");
   //Modal for share button
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
@@ -82,6 +82,8 @@ export default function Card(props) {
 
     fetchPostsandLikesandUsers();
   }, [session]);
+
+  
 
   const onChange = (imageList) => {
     const updatedList = imageList.map((props, index) => ({
@@ -215,11 +217,14 @@ export default function Card(props) {
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
 
-    // Toggle the like state
-    const isLiked = !post.isLiked;
+  // Toggle the like state
+  const isLiked = !post.isLiked;
 
-    updatedPosts[index] = { ...post, isLiked };
-    setPosts(updatedPosts);
+  const newLikeCount = isLiked ? post.like + 1 : post.like - 1;
+  setLikeCount(newLikeCount);
+
+  updatedPosts[index] = { ...post, isLiked, like: newLikeCount };
+  setPosts(updatedPosts);
 
     try {
       // Send the updated like count to the backend

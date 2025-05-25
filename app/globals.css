@@ -23,3 +23,11 @@ body {
   font-size: 20px !important;
   color: red !important;
 }
+
+.alumniSansPinstripe {
+  font-family: var(--font-alumni-sans-pinstripe);
+}
+
+.limeLight {
+  font-family: var(--font-lime-light);
+}
