@@ -278,10 +278,10 @@ export default function Card(props) {
           >
             {({ imageList, onImageUpload, isDragging, dragProps }) => (
               // my UI
-              <div className="image-item__btn-wrapper flex flex-col justify-center items-center gap-4 mt-2">
+              <div className="image-item__btn-wrapper flex flex-col justify-center items-center  gap-4 mt-2">
                 {uploadButton && (
                   <button
-                    className="text-sm py-3 mt-4 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+                    className="text-2xl font-bold py-3 mt-4 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
                     style={isDragging ? { color: "red" } : undefined}
                     onClick={() => {
                       onImageUpload();
@@ -293,7 +293,7 @@ export default function Card(props) {
                     }}
                     {...dragProps}
                   >
-                    Click to Upload
+                    UPLOAD
                   </button>
                 )}
 
@@ -337,13 +337,13 @@ export default function Card(props) {
                       />
 
                       {props.caption && props.caption.length < 10 && (
-                        <p className="text-red-500 text-sm">
+                        <p className="text-red-500 alumniSansPinstripe text-sm">
                           Caption must be at least 10 characters long.
                         </p>
                       )}
 
                       {props.caption && props.caption.length > 150 && (
-                        <p className="text-red-500 text-sm">
+                        <p className="text-red-500 alumniSansPinstripe text-sm">
                           Caption cannot exceed 150 characters.
                         </p>
                       )}
@@ -353,13 +353,13 @@ export default function Card(props) {
                       {session && (
                         <>
                           <button
-                            className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+                            className="text-sm px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
                             onClick={() => onImageUpdate(index)}
                           >
                             Update
                           </button>
                           <button
-                            className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+                            className="text-sm px-4 py-2 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
                             onClick={() => onImageRemove(index)}
                           >
                             Remove
@@ -381,10 +381,10 @@ export default function Card(props) {
         {submitButton && session && (
           <div className="flex justify-center my-4">
             <button
-              className="text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-gray-500 hover:bg-white transition duration-300 w-32 text-center"
+              className="text-2xl font-bold px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
               onClick={handleSubmit}
             >
-              Submit
+              SUBMIT
             </button>
           </div>
         )}
@@ -399,25 +399,22 @@ export default function Card(props) {
               src={post.image_url}
               alt="Uploaded"
             />
-            <span className="text-white text-xs font-semibold flex items-center justify-center">
+            <span className="text-stone-100 alumniSansPinstripe text-xl font-semibold flex items-center justify-center">
               {post.user ? post.user.name : "Unknown User"}
             </span>
 
-            {/* <span className="text-white text-xs font-semibold">
-      {post.users?.name}
-    </span> */}
             <div className="p-1">
               {/* Location and Actions Row */}
               <div className="flex flex-col justify-between w-full mb-2">
                 {/*Location */}
 
                 <div className="flex items-center justify-center gap-1">
-                  <span className="text-white">📍</span>
-                  <h5 className="text-white text-sm font-bold">{post.city},</h5>
-                  <h5 className="text-white text-sm font-bold">{post.state}</h5>
+                  <span>📍</span>
+                  <h5 className="text-stone-100 text-md alumniSansPinstripe font-bold">{post.city},</h5>
+                  <h5 className="text-stone-100 text-md alumniSansPinstripe font-bold">{post.state}</h5>
                 </div>
                 <p
-                  className="text-white text-sm flex items-center text-center justify-center h-20"
+                  className="text-stone-100 text-sm flex items-center  text-center justify-center h-20"
                   style={{ lineHeight: "1.5rem" }}
                 >
                   {post.caption || "No caption available"}
@@ -434,7 +431,7 @@ export default function Card(props) {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="size-6 cursor-pointer text-white"
+                    className="size-6 cursor-pointer text-stone-100"
                   >
                     <path
                       strokeLinecap="round"
@@ -444,14 +441,14 @@ export default function Card(props) {
                   </svg>
 
                   {post.like > 0 && (
-                    <span className="text-white">{post.like}</span>
+                    <span className="text-stone-100 alumniSansPinstripe">{post.like}</span>
                   )}
                 </div>
 
                 {/* share icon*/}
                 <div className="flex justify-start items-start mt-2">
                   <IoShareSocialOutline
-                    className="text-white size-5 cursor-pointer"
+                    className="text-stone-100 size-5 cursor-pointer"
                     onClick={openShareModal}
                   />
                   <ClickAwayListener
