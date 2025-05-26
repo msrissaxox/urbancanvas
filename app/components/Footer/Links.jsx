@@ -2,7 +2,9 @@ import Link from "next/link";
 export default function Links() {
   return (
     <nav className="grid grid-flow-col gap-4">
-      <a className="link link-hover alumniSansPinstripe text-xl text-stone-100">About us</a>
+      <Link href="/about">
+      <span className="link link-hover alumniSansPinstripe text-xl text-stone-100">About us</span>
+      </Link>
       <a
         href="mailto:marissa.bianca.lamothe@gmail.com?subject=Hello&body=Hi%20there"
         className="link link-hover text-xl alumniSansPinstripe text-stone-100">Contact

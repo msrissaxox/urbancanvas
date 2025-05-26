@@ -441,7 +441,7 @@ export default function Card(props) {
                   </svg>
 
                   {post.like > 0 && (
-                    <span className="text-stone-100 alumniSansPinstripe">{post.like}</span>
+                    <span className="text-stone-100 ">{post.like}</span>
                   )}
                 </div>
 
