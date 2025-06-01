@@ -6,6 +6,7 @@ export default function WelcomeUser() {
   //API call to get the user info
   if (session) {
     console.log("User is logged in:", session.user.name);
+    console.log("Session Data:", session);
   }
   const userName = session?.user.name || "User";
 

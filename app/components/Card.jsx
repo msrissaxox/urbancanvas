@@ -160,6 +160,7 @@ export default function Card(props) {
   };
 
   //handle submit button
+
   const handleSubmit = async () => {
     const isValid = images.every(
       // (image) => image.city && image.state && image.caption && image.data_url
@@ -180,9 +181,10 @@ export default function Card(props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          //this is giving me an error
           user_id: session.user.id, // Replace with the logged-in user's ID
           // user_id: session?.user?.oauth_id, // Use oauth_id here
-
+          //session?.user.id || this was there before 
           caption: images[0].caption,
           city: images[0].city,
           state: images[0].state,
