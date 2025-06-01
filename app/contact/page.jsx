@@ -17,9 +17,10 @@ export default function Contact() {
       email: "",
       text: "",
       linkedIn: "",
+      honeypot: "", // Honeypot field for spam prevention
     },
   });
-  const onSubmit = (data) => console.log(data);
+//   const onSubmit = (data) => console.log(data);
 
   return (
             <div className="bg-gradient-to-tl from-stone-900 to-stone-800 h-full">
@@ -34,15 +35,24 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
           Let's Connect
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
+        <form 
+        // onSubmit={handleSubmit(onSubmit)} 
+        className="space-y-6"
+        action="https://formsubmit.co/72bda65f88d7101393a2c07130d85fd4" 
+        method="POST">
+        
+          <div className="form-group">
             <label
               htmlFor="firstName"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 form-control"
+            
             >
+                
               First Name:
               <input
                 type="text"
+                placeholder="First Name"
+                name="firstName"
                 {...register("firstName", {
                   required: "First name is required",
                 })}
@@ -65,6 +75,8 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
               Last Name:
               <input
                 type="text"
+                placeholder="Last Name"
+                name="lastName"
                 {...register("lastName")}
                 id="lastName"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
@@ -80,6 +92,8 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
               Email:
               <input
                 type="email"
+                name="email"
+                placeholder="Email Address"
                 {...register("email", { required: "Email is required" })}
                 id="email"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
@@ -107,6 +121,8 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
                   },
                 })}
                 id="message"
+                placeholder="Your message here"
+                name="message"
                 rows={4}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
               />
@@ -126,6 +142,8 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
               LinkedIn:
               <input
                 type="url"
+                placeholder="https://www.linkedin.com/in/yourprofile"
+                name="linkedIn"
                 {...register("linkedIn")}
                 id="linkedin"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
@@ -133,6 +151,16 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
             </label>
           </div>
 
+              <div>
+                <input 
+                type="text" 
+                placeholder=""
+                autoComplete="off"
+                {...register("honeypot")}
+                name="honeypot" className="hidden" />
+
+
+              </div>
           <div>
             <button
               type="submit"
