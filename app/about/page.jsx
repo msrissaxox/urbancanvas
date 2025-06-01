@@ -1,3 +1,4 @@
+//about page for the Urban Mural app
 import React from "react";
 import Link from "next/link";
 import SecondaryHeader from "app/components/LogInNav/SecondaryHeader";
@@ -7,7 +8,7 @@ export default function About() {
             <div className="bg-gradient-to-tl from-stone-900 to-stone-800 h-full">
 
     <SecondaryHeader />
-<h1 className="text-6xl alumniSansPinstripe font-bold text-stone-100 text-center">About Urban Mural</h1>
+<h1 className="text-6xl alumniSansPinstripe font-bold text-stone-100 text-center p-10">About Urban Mural</h1>
 <img src="/muralAboutPage.jpg" alt="Rio de Janeiro mural" 
 className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow-[0_0_20px_rgba(255,255,255,0.1)]"/>
      <div className="flex justify-center items-center mx-10 p-10">

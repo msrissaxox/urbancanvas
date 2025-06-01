@@ -22,12 +22,15 @@ export default function Contact() {
   const onSubmit = (data) => console.log(data);
 
   return (
-    <div>
+            <div className="bg-gradient-to-tl from-stone-900 to-stone-800 h-full">
     <SecondaryHeader />
-    <h1 className="text-6xl alumniSansPinstripe font-bold text-stone-100 text-center">Contact Urban Mural</h1>
+    <h1 className="text-6xl alumniSansPinstripe font-bold text-stone-100 text-center p-10">Contact Urban Mural</h1>
+    <img src="/orlandoMural.jpg" alt="Mural contact page"
+className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow-[0_0_20px_rgba(255,255,255,0.1)]"/>
+
 
     <div className="bg-gradient-to-tl from-stone-900 to-stone-800 h-full py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-stone-100 shadow-md rounded-lg p-6">
+      <div className="max-w-md mx-auto bg-gradient-to-tl from-stone-100 to-stone-200 shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
           Let's Connect
         </h2>
