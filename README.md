@@ -34,20 +34,20 @@ This website is a platform for users to share and appreciate urban murals from c
 -   **Tailwind CSS:** For styling.
 -   **NextAuth:** For user authentication.
 -   **Vercel:** For hosting and deployment.
+-   **Supabase:** For the PostgreSQL database backend.
 -   **`@emotion/react` & `@emotion/styled`:** For styling components.
 -   **`@heroicons/react`:** For using Heroicons.
 -   **`@mui/icons-material` & `@mui/material`:** For Material UI icons and components.
 -   **`dotenv`:** For managing environment variables.
 -   **`framer-motion`:** For animations.
 -   **`lucide-react`:** For using Lucide icons.
--   **`pg`:** For PostgreSQL database interaction (likely used indirectly via NextAuth or other ORM).
+-   **`pg`:** For PostgreSQL database interaction (via NextAuth).
 -   **`react-dom`:** For the React DOM.
 -   **`react-hook-form`:** For form handling.
 -   **`react-icons`:** For various icons.
 -   **`react-images-uploading`:** For handling image uploads.
 -   **`react-share`:** For social sharing functionality.
 -   **`shadcn-ui`:** For UI components.
-
 ## Getting Started
 
 1.  **Clone the Repository**
