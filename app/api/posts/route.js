@@ -94,10 +94,10 @@ export async function POST(req) {
     const body = await req.json();
     console.log("POST /api/posts body:", body); 
 
-    const { user_id: oauth_id, caption, city, state, image_url } = body;
+    const { user_id, caption, city, state, image_url } = body;
 
     // Validate required fields
-    if (!oauth_id || !caption || !city || !state || !image_url) {
+    if (!user_id || !caption || !city || !state || !image_url) {
      return NextResponse.json(
         { message: "All fields are required" },
         { status: 400 }
@@ -107,8 +107,8 @@ export async function POST(req) {
 const { data: userResult, error: userError } = await supabase
     .from('users') //selecting from users table
     .select('id') //selecting id column
-    .eq('oauth_id', oauth_id) //where oauth_id matches the provided oauth_id
-    .single(); // Expecting a single user
+    .eq('id', user_id) //where oauth_id matches the provided oauth_id
+    .maybeSingle(); // Expecting a single user
 
 
     //   `SELECT id FROM users WHERE oauth_id = $1`,
@@ -141,13 +141,13 @@ if(userError){
     //   );
     // }
 
-const user_uuid = userResult.id;    
+// const user_uuid = userResult.id;    
     //updated to use supabase client
 
     const {data: result, error: error } = await supabase
     .from('posts') //selecting from posts table
     .insert({
-      user_id: user_uuid, // Using the user ID from the users table
+      user_id: userProfile.id, // Using the user ID from the users table
       caption,
       city,
       state,
