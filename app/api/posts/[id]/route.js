@@ -1,267 +1,160 @@
-//id routes
-
-//posts routes
-//Common HTTP methods here are:
 
 
-import pool from "@lib/databaseConnection/db"; // Adjust the path if needed
+import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
-// POST /api/posts/[postId]/likes
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// POST: Add a like to a post
 export async function POST(req, { params }) {
   const { id: postId } = params;
   const { userId } = await req.json();
 
   if (!userId) {
-    return new Response(JSON.stringify({ success: false, message: "User ID is required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
   }
 
   try {
     // Check if the user has already liked this post
-    const existingLike = await pool.query(
-      "SELECT * FROM likes WHERE post_id = $1 AND user_id = $2",
-      [postId, userId]
-    );
+    const { data: existingLike } = await supabase
+      .from('likes')
+      .select('id')
+      .eq('post_id', postId)
+      .eq('user_id', userId)
+      .maybeSingle();
 
-    if (existingLike.rows.length > 0) {
-      return new Response(JSON.stringify({ success: false, message: "You have already liked this post" }), {
-        status: 409, // Conflict
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!existingLike) {
+      const { error: insertError } = await supabase
+      .from('likes')
+      .insert({ user_id: userId, post_id: postId });
+      if (insertError) {
+        console.error("Error inserting like:", insertError);
+        return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
+      }
     }
 
-    // Add the like
-    await pool.query(
-      "INSERT INTO likes (post_id, user_id) VALUES ($1, $2)",
-      [postId, userId]
-    );
+    // Get the updated like count
+    const { count: likeCount } = await supabase
+      .from('likes')
+      .select('id', { count: 'exact', head: true })
+      .eq('post_id', postId);
 
-    // Fetch the updated like count
-    const likeCountResult = await pool.query(
-      "SELECT COUNT(*) AS like_count FROM likes WHERE post_id = $1",
-      [postId]
-    );
-    const likeCount = parseInt(likeCountResult.rows[0].like_count, 10);
-
-    return new Response(
-      JSON.stringify({ success: true, message: "Post liked!", likeCount }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return NextResponse.json({ success: true, message: "Post liked!", likeCount }, { status: 200 });
   } catch (error) {
     console.error("Error liking post:", error);
-    return new Response(
-      JSON.stringify({ success: false, message: "Internal server error", error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
   }
 }
 
-export async function GET(request, { params }) {
-  const { id } = params;
+// PUT: Like or unlike a post based on isLiked
+export async function PUT(req, context) {
+  const { id: postId } = await context.params;
+  const { user_id, isLiked } = await req.json();
+
+  if (!postId || !user_id) {
+    return NextResponse.json({ success: false, message: "Missing post_id or user_id" }, { status: 400 });
+  }
 
   try {
-    console.log("Fetching post with ID: ", id); 
-    const result = await pool.query
-    ("SELECT * FROM posts WHERE id = $1", [id]);
-    console.log("Query result:", result.rows);
+    // Check if the like already exists
+    const { data: existingLike } = await supabase
+      .from('likes')
+      .select('id')
+      .eq('user_id', user_id)
+      .eq('post_id', postId)
+      .maybeSingle();
 
-  if (result.rows.length === 0) {
-      return new Response(JSON.stringify({ success: false, message: "Post not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+    if (isLiked && !existingLike) {
+      // Add like if not already liked
+      const {error: insertError } = await supabase
+      .from('likes')
+      .insert({ user_id, post_id: postId });
+      if (insertError) {
+        console.error("Error inserting like:", insertError);
+        return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
+      }
+
+    } else if (!isLiked && existingLike) {
+      // Remove like if it exists
+      await supabase
+        .from('likes')
+        .delete()
+        .eq('user_id', user_id)
+        .eq('post_id', postId);
     }
 
+    // Get the updated like count
+    const { count: likeCount } = await supabase
+      .from('likes')
+      .select('id', { count: 'exact', head: true })
+      .eq('post_id', postId);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data: result.rows[0],
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return NextResponse.json({
+      success: true,
+      message: "Like count updated successfully",
+      likeCount,
+    }, { status: 200 });
   } catch (error) {
-    console.error("Error fetching posts:", error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        message: "Internal server error",
-        error: error.message,
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    console.error('Error updating like count:', error);
+    return NextResponse.json({ success: false, message: 'Internal server error', error: error.message }, { status: 500 });
   }
 }
-// DELETE /api/posts/[postId]/likes
+
+// GET: Fetch a single post by ID
+export async function GET(request, { params }) {
+  const { id: postId } = params;
+
+  try {
+    const { data: post, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('id', postId)
+      .maybeSingle();
+
+    if (error || !post) {
+      return NextResponse.json({ success: false, message: "Post not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: post }, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
+  }
+}
+
+// DELETE: Remove a like from a post
 export async function DELETE(req, { params }) {
   const { id: postId } = params;
   const { userId } = await req.json();
 
   if (!userId) {
-    return new Response(JSON.stringify({ success: false, message: "User ID is required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
   }
 
   try {
-    // Remove the like
-    const result = await pool.query(
-      "DELETE FROM likes WHERE post_id = $1 AND user_id = $2 RETURNING *",
-      [postId, userId]
-    );
+    const { data: deletedLike } = await supabase
+      .from('likes')
+      .delete()
+      .eq('post_id', postId)
+      .eq('user_id', userId)
+      .select()
+      .maybeSingle();
 
-    if (result.rows.length === 0) {
-      return new Response(JSON.stringify({ success: false, message: "Like not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!deletedLike) {
+      return NextResponse.json({ success: false, message: "Like not found" }, { status: 404 });
     }
 
-    // Fetch the updated like count
-    const likeCountResult = await pool.query(
-      "SELECT COUNT(*) AS like_count FROM likes WHERE post_id = $1",
-      [postId]
-    );
-    const likeCount = parseInt(likeCountResult.rows[0].like_count, 10);
+    // Get the updated like count
+    const { count: likeCount } = await supabase
+      .from('likes')
+      .select('id', { count: 'exact', head: true })
+      .eq('post_id', postId);
 
-    return new Response(
-      JSON.stringify({ success: true, message: "Post unliked!", likeCount }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return NextResponse.json({ success: true, message: "Post unliked!", likeCount }, { status: 200 });
   } catch (error) {
     console.error("Error unliking post:", error);
-    return new Response(
-      JSON.stringify({ success: false, message: "Internal server error", error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
   }
 }
-
-
-export async function PUT (req, context) {
-  
-  const { id } = context.params;
-
-  try {
- const { user_id, isLiked } = await req.json();
-
-    if (!id || !user_id) {
-      return new Response(
-        JSON.stringify({ success: false, message: "Missing post_id or user_id" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    if (isLiked) {
-      await pool.query(
-        `INSERT INTO likes (user_id, post_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-        [user_id, id]
-      );
-    } else {
-      await pool.query(
-        `DELETE FROM likes WHERE user_id = $1 AND post_id = $2`,
-        [user_id, id]
-      );
-    }
-
-    const likeResult = await pool.query(
-      `SELECT COUNT(*) AS like FROM likes WHERE post_id = $1`,
-      [id]
-    );
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Like count updated successfully",
-        likeCount: parseInt(likeResult.rows[0].like, 10),
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error('Error updating like count:', error);
-    return new Response(
-      JSON.stringify({ success: false, message: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
-}
-
-//     const body = await req.json();
-//     console.log("PUT /api/posts body:", body); 
-
-//     const { caption, city, state, image_url } = body;
-
-//     // Validate required fields
-//     if (!caption || !city || !state || !image_url) {
-//       return new Response(
-//         JSON.stringify({ message: "All fields are required" }),
-//         {
-//           status: 400,
-//           headers: { "Content-Type": "application/json" },
-//         }
-//       );
-//     }
-
-//     const result = await pool.query(
-//       `UPDATE posts SET caption = $1, city = $2, state = $3, image_url = $4 WHERE id = $5 RETURNING *`,
-//       [caption, city, state, image_url, id]
-//     );
-//     console.log("Query result:", result.rows);
-//     if (result.rows.length === 0) {
-//       return new Response(JSON.stringify({ success: false, message: "Post not found" }), {
-//         status: 404,
-//         headers: { "Content-Type": "application/json" },
-//       });
-//     }
-//     return new Response(
-//       JSON.stringify({
-//         success: true,
-//         message: "Post updated successfully",
-//         data: result.rows[0],
-//       }),
-//       {
-//         status: 200,
-//         headers: { "Content-Type": "application/json" },
-//       }
-//     );
-//   }
-//   catch (error) {
-//     console.error("Error updating post:", error);
-//     return new Response(
-//       JSON.stringify({
-//         success: false,
-//         message: "Internal server error",
-//         error: error.message,
-//       }),
-//       {
-//         status: 500,
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//   }
-// }

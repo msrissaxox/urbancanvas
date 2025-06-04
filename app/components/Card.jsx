@@ -5,6 +5,7 @@ import ImageUploading from "react-images-uploading";
 import { IoShareSocialOutline } from "react-icons/io5";
 import SocialShareMedia from "./ui/SocialShareMedia";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
+import { set } from "react-hook-form";
 
 export default function Card(props) {
   const { data: session } = useSession(); //This gets the session data from next-auth
@@ -16,6 +17,8 @@ export default function Card(props) {
   const [uploadButton, showUploadButton] = useState(true);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [likeCount, setLikeCount] = useState("");
+  const [loading, setLoading] = useState(true);
+
   //Modal for share button
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
@@ -23,6 +26,7 @@ export default function Card(props) {
   //fetch posts from the database
   useEffect(() => {
     const fetchPostsandLikesandUsers = async () => {
+      setLoading(true);
       try {
         //Get the posts from the database
         // console.log("session.user.id", session.user.id);
@@ -78,6 +82,7 @@ export default function Card(props) {
       } catch (error) {
         console.error("Error fetching posts and likes:", error);
       }
+      setLoading(false);
     };
 
     fetchPostsandLikesandUsers();
@@ -265,7 +270,9 @@ export default function Card(props) {
       setPosts(updatedPosts);
     }
   };
-
+if (loading) {
+  return <div className="text-stone-100 text-center alumniSansPinstripe text-3xl">Loading...</div>;
+}
   return (
     <div>
       <div className="App">
