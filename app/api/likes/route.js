@@ -131,11 +131,7 @@ export async function POST(request) {
       .insert([{ user_id, post_id }])
       .select('*')
       .single();
-    //   `INSERT INTO likes (user_id, post_id)
-    //    VALUES ($1, $2)
-    //    RETURNING *`,
-    //   [user_id, post_id]
-    // );
+
 
     if (insertError) {
       console.error("Supabase error inserting like:", insertError.message);
@@ -146,7 +142,7 @@ export async function POST(request) {
     }
 
 // Check if insertion actually returned data
-    if (!newLike) {
+    if (!result) {
         console.error("Like insertion failed: No data returned.");
         return NextResponse.json(
             { success: false, message: "Like insertion failed: No data returned." },
@@ -158,7 +154,7 @@ export async function POST(request) {
       {
         success: true,
         message: "Post liked successfully",
-        data: newLike, // 'newLike' is the inserted object, not an array
+        data: result, // 'newLike' is the inserted object, not an array
       },
       { status: 201 }
     );
@@ -175,26 +171,7 @@ export async function POST(request) {
   }
 }
 
-//     return new Response(
-//       JSON.stringify({
-//         success: true,
-//         message: "Post liked successfully",
-//         data: result.rows[0],
-//       }),
-//       { status: 201, headers: { "Content-Type": "application/json" } }
-//     );
-//   } catch (error) {
-//     console.error("Error liking post:", error);
-//     return new Response(
-//       JSON.stringify({
-//         success: false,
-//         message: "Failed to like post",
-//         error: error.message,
-//       }),
-//       { status: 500, headers: { "Content-Type": "application/json" } }
-//     );
-//   }
-// }
+
 
 // DELETE /api/likes
 export async function DELETE(request) {
@@ -215,11 +192,7 @@ export async function DELETE(request) {
       .eq('post_id', post_id)
       .select('*')
       .single();
-    //   `DELETE FROM likes
-    //    WHERE user_id = $1 AND post_id = $2
-    //    RETURNING *`,
-    //   [user_id, post_id]
-    // );
+
 
 // Handle Supabase error during deletion
     if (deleteError) {
@@ -241,7 +214,7 @@ return NextResponse.json( // Use NextResponse.json
       {
         success: true,
         message: "Like removed successfully",
-        data: deletedLike, // 'deletedLike' is the deleted object, not an array
+        data: result, //
       },
       { status: 200 }
     );
@@ -257,33 +230,3 @@ return NextResponse.json( // Use NextResponse.json
     );
   }
 }
-//     if (result.rows.length === 0) {
-//       return new Response(
-//         JSON.stringify({
-//           success: false,
-//           message: "Like not found",
-//         }),
-//         { status: 404, headers: { "Content-Type": "application/json" } }
-//       );
-//     }
-
-//     return new Response(
-//       JSON.stringify({
-//         success: true,
-//         message: "Like removed successfully",
-//         data: result.rows[0],
-//       }),
-//       { status: 200, headers: { "Content-Type": "application/json" } }
-//     );
-//   } catch (error) {
-//     console.error("Error removing like:", error);
-//     return new Response(
-//       JSON.stringify({
-//         success: false,
-//         message: "Failed to remove like",
-//         error: error.message,
-//       }),
-//       { status: 500, headers: { "Content-Type": "application/json" } }
-//     );
-//   }
-// }

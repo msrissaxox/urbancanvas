@@ -2,8 +2,9 @@
 //Common HTTP methods here are:
 
 //GET: To fetch details of a single post. DONE
-//PUT: To update an existing post. DONE
-//DELETE: To delete a specific post.
+//PUT: To update an existing post. need to do
+//DELETE: To delete a specific post. nneed to do
+//POST: To create a new post. DONE
 
 
 // import pool from '@lib/databaseConnection/db'; // Adjust the path if needed
@@ -105,6 +106,8 @@ export async function POST(req) {
     }
 //updated to use supabase client
 const { data: userResult, error: userError } = await supabase
+  .schema('next_auth')
+
     .from('users') //selecting from users table
     .select('id') //selecting id column
     .eq('id', user_id) //where oauth_id matches the provided oauth_id
@@ -116,7 +119,7 @@ const { data: userResult, error: userError } = await supabase
     // );
 
 if(userError){
-    console.error("Supabase error fetching user by oauth_id:", userError.message);
+    console.error("Supabase error fetching user by id:", userError.message);
     return NextResponse.json(
       { success: false, message: userError.message || "Failed to find user for post creation due to database error." },
             { status: 500 }
@@ -125,7 +128,7 @@ if(userError){
 // Check if user was actually found (userResult will be null if not found by .single())
     if (!userResult) {
       return NextResponse.json( // Using NextResponse.json
-        { message: "User not found for the provided OAuth ID." },
+        { message: "User not found for the provided user_id." },
         { status: 404 }
       );
     }
@@ -144,10 +147,10 @@ if(userError){
 // const user_uuid = userResult.id;    
     //updated to use supabase client
 
-    const {data: result, error: error } = await supabase
+    const {data: insertedPost, error: postError } = await supabase
     .from('posts') //selecting from posts table
     .insert({
-      user_id: userProfile.id, // Using the user ID from the users table
+      user_id: userResult.id, // Using the user ID from the users table
       caption,
       city,
       state,
