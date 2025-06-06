@@ -269,12 +269,12 @@ export default function Card(props) {
       updatedPosts[index] = { ...post };
       setPosts(updatedPosts);
     }
-  };
+};
 if (loading) {
   return <div className="text-stone-100 text-center alumniSansPinstripe text-3xl">Loading...</div>;
 }
-  return (
-    <div>
+return (
+
       <div className="App">
         {session ? (
           <ImageUploading
@@ -287,117 +287,92 @@ if (loading) {
           >
             {({ imageList, onImageUpload, isDragging, dragProps }) => (
               // my UI
-              <div className="image-item__btn-wrapper flex flex-col justify-center items-center  gap-4 mt-2">
-                {uploadButton && (
-                  <button
-                    className="text-2xl font-bold py-3 mt-4 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
-                    style={isDragging ? { color: "red" } : undefined}
-                    onClick={() => {
-                      onImageUpload();
-                      showSubmitButton(true);
-                      showUploadButton(false);
-                      setTimeout(() => {
-                        showUploadButton(true); // Show the Upload button again
-                      }, 1000);
-                    }}
-                    {...dragProps}
-                  >
-                    UPLOAD
-                  </button>
+              <>
+                // my UI
+                <div className="image-item__btn-wrapper flex flex-col justify-center items-center  gap-4 mt-2">
+                  {uploadButton && (
+                    <button
+                      className="text-2xl font-bold py-3 mt-4 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
+                      style={isDragging ? { color: "red" } : undefined}
+                      onClick={() => {
+                        onImageUpload();
+                        showSubmitButton(true);
+                        showUploadButton(false);
+                        setTimeout(() => {
+                          showUploadButton(true); // Show the Upload button again
+                        }, 1000);
+                      } }
+                      {...dragProps}
+                    >
+                      UPLOAD
+                    </button>
+                  )}
+
+                  {imageList.map((props, index) => (
+                    <div key={index} className="image-item">
+                      <img
+                        className="w-64 h-64 rounded-lg object-cover"
+                        src={props["data_url"]}
+                        alt="" />
+                      <div className="flex flex-col gap-2 pt-2">
+                        <input
+                          type="text"
+                          placeholder="City"
+                          required={true}
+                          value={props.city}
+                          onChange={(e) => handleInputChange(index, "city", e.target.value)} />
+                        <input
+                          type="text"
+                          placeholder="State"
+                          required={true}
+                          value={props.state}
+                          onChange={(e) => handleInputChange(index, "state", e.target.value)} />
+
+                        <input
+                          type="text"
+                          placeholder="Tell us how this artwork moved you"
+                          required={true}
+                          maxLength={100}
+                          minLength={10}
+                          value={props.caption}
+                          onChange={(e) => handleInputChange(index, "caption", e.target.value)} />
+
+                        {props.caption && props.caption.length < 10 && (
+                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                            Caption must be at least 10 characters long.
+                          </p>
+                        )}
+
+                        {props.caption && props.caption.length > 150 && (
+                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                            Caption cannot exceed 150 characters.
+                          </p>
+                        )}
+                      </div>
+
+
+
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex justify-center my-2">
+                          {submitButton && session && (
+                            <div className="flex justify-center my-4">
+                              <button
+                                className="text-2xl font-bold px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
+                                onClick={handleSubmit}
+                              >
+                                SUBMIT
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </ImageUploading>
+                ) : (
+                  <></>
                 )}
-
-                {imageList.map((props, index) => (
-                  <div key={index} className="image-item">
-                    <img
-                      className="w-64 h-64 rounded-lg object-cover"
-                      src={props["data_url"]}
-                      alt=""
-                    />
-                    <div className="flex flex-col gap-2 pt-2">
-                      <input
-                        type="text"
-                        placeholder="City"
-                        required={true}
-                        value={props.city}
-                        onChange={(e) =>
-                          handleInputChange(index, "city", e.target.value)
-                        }
-                      />
-                      <input
-                        type="text"
-                        placeholder="State"
-                        required={true}
-                        value={props.state}
-                        onChange={(e) =>
-                          handleInputChange(index, "state", e.target.value)
-                        }
-                      />
-
-                      <input
-                        type="text"
-                        placeholder="Tell us how this artwork moved you"
-                        required={true}
-                        maxLength={100}
-                        minLength={10}
-                        value={props.caption}
-                        onChange={(e) =>
-                          handleInputChange(index, "caption", e.target.value)
-                        }
-                      />
-
-                      {props.caption && props.caption.length < 10 && (
-                        <p className="text-red-500 alumniSansPinstripe text-sm">
-                          Caption must be at least 10 characters long.
-                        </p>
-                      )}
-
-                      {props.caption && props.caption.length > 150 && (
-                        <p className="text-red-500 alumniSansPinstripe text-sm">
-                          Caption cannot exceed 150 characters.
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="image-item__btn-wrapper mt-4">
-                      {session && (
-                        <>
-                          <button
-                            className="text-sm px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
-                            onClick={() => onImageUpdate(index)}
-                          >
-                            Update
-                          </button>
-                          <button
-                            className="text-sm px-4 py-2 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
-                            onClick={() => onImageRemove(index)}
-                          >
-                            Remove
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </ImageUploading>
-        ) : (
-          <></>
-        )}
-      </div>
-
-      <div className="flex justify-center my-2">
-        {submitButton && session && (
-          <div className="flex justify-center my-4">
-            <button
-              className="text-2xl font-bold px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
-              onClick={handleSubmit}
-            >
-              SUBMIT
-            </button>
-          </div>
-        )}
-      </div>
 
       {/* Display submitted images below*/}
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 pb-5 m-5 justify-center items-center">
@@ -475,6 +450,23 @@ if (loading) {
                   </ClickAwayListener>
                 </div>
               </div>
+
+              {session && post.user_id === session.user.id && (
+        <div className="image-item__btn-wrapper mt-4 flex gap-2">
+          <button
+            className="text-sm px-4 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
+            onClick={() => onImageUpdate(index)}
+          >
+            Update
+          </button>
+          <button
+            className="text-sm px-4 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
+            onClick={() => onImageRemove(index)}
+          >
+            Remove
+          </button>
+        </div>
+      )}
             </div>
           </div>
         ))}
