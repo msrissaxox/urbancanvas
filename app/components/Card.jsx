@@ -18,9 +18,22 @@ export default function Card(props) {
   const [likeCount, setLikeCount] = useState("");
   const [loading, setLoading] = useState(true);
 
+
+  const [updatingPostIndex, setUpdatingPostIndex] = useState(null);
+const [updateImageList, setUpdateImageList] = useState([]);
+
+
   //Modal for share button
   const openShareModal = () => setIsShareModalOpen(true);
   const closeShareModal = () => setIsShareModalOpen(false);
+
+
+  const handleUpdateInputChange = (imgIdx, field, value) => {
+  const updated = [...updateImageList];
+  updated[imgIdx] = { ...updated[imgIdx], [field]: value };
+  setUpdateImageList(updated);
+};
+
 
   //fetch posts from the database
   useEffect(() => {
@@ -102,37 +115,45 @@ export default function Card(props) {
     }));
     setImages(updatedList);
   };
+
+
   //Handle image Update
-  const onImageUpdate = async (index) => {
-    const updatedImage = prompt(
-      "Enter a new image URL:",
-      posts[index].image_url
-    );
-    if (updatedImage) {
-      try {
-        const response = await fetch(`/api/posts/${posts[index].id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            image_url: updatedImage,
-          }),
-        });
-        const data = await response.json();
-        if (data.success) {
-          const updatedPosts = [...posts];
-          updatedPosts[index] = {
-            ...updatedPosts[index],
-            image_url: updatedImage,
-          };
-          setPosts(updatedPosts);
-        } else {
-          console.error("Failed to update post:", data.message);
-        }
-      } catch (error) {
-        console.error("Error updating post:", error);
-      }
+  const handleImageUpdate = async (imageList, index) => {
+  if (!imageList[0]) return;
+  const updatedImage = imageList[0].data_url; // Or handle file upload if using storage
+  const city = imageList[0].city;
+  const state = imageList[0].state;
+  const caption = imageList[0].caption;
+  try {
+    const response = await fetch(`/api/posts/${posts[index].id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+         post_id: posts[index].id,
+  user_id: session.user.id,
+        image_url: updatedImage,
+          city,
+        state,
+        caption,
+      }),
+    });
+    const data = await response.json();
+    if (data.success) {
+      const updatedPosts = [...posts];
+      updatedPosts[index] = {
+        ...updatedPosts[index],
+        image_url: updatedImage,
+      };
+      setPosts(updatedPosts);
+      setUpdatingPostIndex(null);
+      setUpdateImageList([]);
+    } else {
+      console.error("Failed to update post:", data.message);
     }
-  };
+  } catch (error) {
+    console.error("Error updating post:", error);
+  }
+};
 
   //Handle image Remove
   const onImageRemove = async (index) => {
@@ -175,9 +196,7 @@ export default function Card(props) {
       alert("Please fill in all fields for each image.");
       return;
     }
-    //   setSubmittedImages([...submittedImages, ...images]);
-    //   setImages([]);
-    // };
+
     try {
       console.log("submitting post", images[0]);
       // Send the image data to the backend
@@ -435,7 +454,7 @@ return (
         <div className="image-item__btn-wrapper mt-4 flex gap-2">
           <button
             className="text-sm px-4 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
-            onClick={() => onImageUpdate(index)}
+            onClick={() => setUpdatingPostIndex(index)}
           >
             Update
           </button>
@@ -445,6 +464,194 @@ return (
           >
             Remove
           </button>
+
+{/* {imageList.map((props, index) => (
+                    <div key={index} className="image-item">
+                      <img
+                        className="w-64 h-64 rounded-lg object-cover"
+                        src={props["data_url"]}
+                        alt="" />
+                      <div className="flex flex-col gap-2 pt-2">
+                        <input
+                          type="text"
+                          placeholder="City"
+                          required={true}
+                          value={props.city}
+                          onChange={(e) => handleInputChange(index, "city", e.target.value)} />
+                        <input
+                          type="text"
+                          placeholder="State"
+                          required={true}
+                          value={props.state}
+                          onChange={(e) => handleInputChange(index, "state", e.target.value)} />
+
+                        <input
+                          type="text"
+                          placeholder="Tell us how this artwork moved you"
+                          required={true}
+                          maxLength={100}
+                          minLength={10}
+                          value={props.caption}
+                          onChange={(e) => handleInputChange(index, "caption", e.target.value)} />
+
+                        {props.caption && props.caption.length < 10 && (
+                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                            Caption must be at least 10 characters long.
+                          </p>
+                        )}
+
+                        {props.caption && props.caption.length > 150 && (
+                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                            Caption cannot exceed 150 characters.
+                          </p>
+                    */}
+
+{/* {updatingPostIndex === index && (
+      <ImageUploading
+        value={updateImageList}
+        onChange={(imageList) => handleImageUpdate(imageList, index)}
+        maxNumber={1}
+        dataURLKey="data_url"
+      >
+        {({ onImageUpload }) => (
+          <button
+            className="mt-2 px-4 py-2 bg-stone-600 text-white rounded"
+            onClick={onImageUpload}
+            type="button"
+          >
+            Choose New Image
+          </button>
+        )}
+     
+
+{imageList.map((props, index) => (
+                    <div key={index} className="image-item">
+                      <img
+                        className="w-64 h-64 rounded-lg object-cover"
+                        src={props["data_url"]}
+                        alt="" />
+                      <div className="flex flex-col gap-2 pt-2">
+                        <input
+                          type="text"
+                          placeholder="City"
+                          required={true}
+                          value={props.city}
+                          onChange={(e) => handleInputChange(index, "city", e.target.value)} />
+                        <input
+                          type="text"
+                          placeholder="State"
+                          required={true}
+                          value={props.state}
+                          onChange={(e) => handleInputChange(index, "state", e.target.value)} />
+
+                        <input
+                          type="text"
+                          placeholder="Tell us how this artwork moved you"
+                          required={true}
+                          maxLength={100}
+                          minLength={10}
+                          value={props.caption}
+                          onChange={(e) => handleInputChange(index, "caption", e.target.value)} />
+
+                        {props.caption && props.caption.length < 10 && (
+                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                            Caption must be at least 10 characters long.
+                          </p>
+                        )}
+
+                        {props.caption && props.caption.length > 150 && (
+                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                            Caption cannot exceed 150 characters.
+                          </p>
+                           </ImageUploading> */}
+
+
+
+
+{updatingPostIndex === index && (
+  <ImageUploading
+    value={updateImageList}
+    onChange={(imageList) => setUpdateImageList(imageList)}
+    maxNumber={1}
+    dataURLKey="data_url"
+  >
+    {({ imageList, onImageUpload, isDragging, dragProps }) => (
+      <div className="flex flex-col items-center gap-4 mt-2">
+        <button
+          className="text-2xl font-bold py-3 mt-4 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
+          style={isDragging ? { color: "red" } : undefined}
+          onClick={onImageUpload}
+          {...dragProps}
+        >
+          Choose Image
+        </button>
+        {imageList.map((img, imgIdx) => (
+          <div key={imgIdx} className="image-item">
+            <img
+              className="w-64 h-64 rounded-lg object-cover"
+              src={img["data_url"]}
+              alt=""
+            />
+            <div className="flex flex-col gap-2 pt-2">
+              <input
+                type="text"
+                placeholder="City"
+                required={true}
+                value={img.city || ""}
+                onChange={e => handleUpdateInputChange(imgIdx, "city", e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="State"
+                required={true}
+                value={img.state || ""}
+                onChange={e => handleUpdateInputChange(imgIdx, "state", e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Tell us how this artwork moved you"
+                required={true}
+                maxLength={100}
+                minLength={10}
+                value={img.caption || ""}
+                onChange={e => handleUpdateInputChange(imgIdx, "caption", e.target.value)}
+              />
+              {img.caption && img.caption.length < 10 && (
+                <p className="text-red-500 alumniSansPinstripe text-sm">
+                  Caption must be at least 10 characters long.
+                </p>
+              )}
+              {img.caption && img.caption.length > 150 && (
+                <p className="text-red-500 alumniSansPinstripe text-sm">
+                  Caption cannot exceed 150 characters.
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+        <div className="flex gap-2">
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded"
+            onClick={() => handleImageUpdate(updateImageList, index)}
+          >
+            Save
+          </button>
+          <button
+            className="px-4 py-2 bg-gray-400 text-white rounded"
+            onClick={() => {
+              setUpdatingPostIndex(null);
+              setUpdateImageList([]);
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    )}
+  </ImageUploading>
+)}
+
+
         </div>
       )}
             </div>

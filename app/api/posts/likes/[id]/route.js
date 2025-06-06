@@ -1,4 +1,7 @@
 
+//This file handles the API routes for managing likes on specific posts.
+// It includes endpoints for liking, unliking, and fetching posts with their like counts.
+// It uses Supabase as the backend for database operations and Next.js for server-side handling.
 
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';

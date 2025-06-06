@@ -1,4 +1,8 @@
 // import pool from "@lib/databaseConnection/db";
+//This file handles the API routes for likes in a Next.js application using Supabase as the backend.
+//It gets ALL likes from the database. No specific post ID is required for this endpoint.
+
+
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server'; // Import NextResponse for consistent response handling
 

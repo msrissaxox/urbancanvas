@@ -2,8 +2,6 @@
 //Common HTTP methods here are:
 
 //GET: To fetch details of a single post. DONE
-//PUT: To update an existing post. need to do
-//DELETE: To delete a specific post. nneed to do
 //POST: To create a new post. DONE
 
 
@@ -61,35 +59,12 @@ export async function GET() {
     );
   }
 }
-//     return new Response(
-//       JSON.stringify({
-//         success: true,
-//         data: posts,
-//       }),
-//       {
-//         status: 200,
-//         headers: { "Content-Type": "application/json" },
-//       }
-//     );
-//   } catch (error) {
-//     console.error("Supabase error fetching posts:", error);
-//     return new Response(
-//       JSON.stringify({
-//         success: false,
-//         message: error.message
-//       }),
-//       {
-//         status: 500,
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//   }
-// }
 
 
-
+//this is the POST method to create a new post
+// It expects a JSON body with user_id, caption, city, state, and image_url.
+// It validates the input, checks if the user exists, and then inserts a new post into the database.
+// If successful, it returns the created post data; otherwise, it returns an error message.
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -104,19 +79,20 @@ export async function POST(req) {
         { status: 400 }
       );
     }
+
+        console.log("user_id from frontend:", user_id);
+
+
 //updated to use supabase client
 const { data: userResult, error: userError } = await supabase
-  .schema('next_auth')
 
+// console.log("user_id from frontend:", user_id); 
+  .schema('next_auth')
     .from('users') //selecting from users table
     .select('id') //selecting id column
     .eq('id', user_id) //where oauth_id matches the provided oauth_id
     .maybeSingle(); // Expecting a single user
 
-
-    //   `SELECT id FROM users WHERE oauth_id = $1`,
-    //   [oauth_id]
-    // );
 
 if(userError){
     console.error("Supabase error fetching user by id:", userError.message);
@@ -134,19 +110,6 @@ if(userError){
     }
 
 
-    //  if (!userResult) {
-    //   return new Response(
-    //     JSON.stringify({ message: "User not found" }),
-    //     {
-    //       status: 404,
-    //       headers: { "Content-Type": "application/json" },
-    //     }
-    //   );
-    // }
-
-// const user_uuid = userResult.id;    
-    //updated to use supabase client
-
     const {data: insertedPost, error: postError } = await supabase
     .from('posts') //selecting from posts table
     .insert({
@@ -160,12 +123,6 @@ if(userError){
     .select() // Selecting all columns of the newly created post
     .single(); // Expecting a single post to be returned
 
-
-  //     `INSERT INTO posts (user_id, caption, city, state, image_url, created_at)
-  //  VALUES ($1, $2, $3, $4, $5, NOW())
-  //  RETURNING *`,
-  //     [user_uuid, caption, city, state, image_url]
-  //   );
 
 if (postError) {
         console.error("Supabase error creating post:", postError.message);
@@ -201,24 +158,3 @@ if (postError) {
     });
   }
 }
-
-
-//     return new Response(
-//       JSON.stringify({
-//         success: true,
-//         message: "Post created successfully",
-//         data: newPost,
-//       }),
-//       {
-//         status: 201,
-//         headers: { "Content-Type": "application/json" },
-//       }
-//     );
-//   } catch (error) {
-//     console.error("Error creating post:", error);
-//     return new Response(JSON.stringify({ message: "Internal server error" }), {
-//       status: 500,
-//       headers: { "Content-Type": "application/json" },
-//     });
-//   }
-// }
