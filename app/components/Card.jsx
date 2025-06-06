@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ImageUploading from "react-images-uploading";
 import { IoShareSocialOutline } from "react-icons/io5";
-import SocialShareMedia from "./ui/SocialShareMedia";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { set } from "react-hook-form";
 
@@ -429,26 +428,7 @@ return (
                   )}
                 </div>
 
-                {/* share icon*/}
-                <div className="flex justify-start items-start mt-2">
-                  <IoShareSocialOutline
-                    className="text-stone-100 size-5 cursor-pointer"
-                    onClick={openShareModal}
-                  />
-                  <ClickAwayListener
-                    mouseEvent="onMouseDown"
-                    touchEvent="onTouchStart"
-                    onClickAway={closeShareModal}
-                  >
-                    {/* This SocialShareMedia icon is a modal that opens when the share icon is clicked */}
-                    {/* It contains the share options for the image */}
-
-                    <SocialShareMedia
-                      isOpen={isShareModalOpen}
-                      onClose={closeShareModal}
-                    />
-                  </ClickAwayListener>
-                </div>
+           
               </div>
 
               {session && post.user_id === session.user.id && (
