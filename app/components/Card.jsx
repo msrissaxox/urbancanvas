@@ -34,10 +34,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
   setUpdateImageList(updated);
 };
 
-
-  //fetch posts from the database
-  useEffect(() => {
-    const fetchPostsandLikesandUsers = async () => {
+ const fetchPostsandLikesandUsers = async () => {
       setLoading(true);
       try {
         //Get the posts from the database
@@ -96,6 +93,68 @@ const [updateImageList, setUpdateImageList] = useState([]);
       }
       setLoading(false);
     };
+
+  //fetch posts from the database
+  useEffect(() => {
+    // const fetchPostsandLikesandUsers = async () => {
+    //   setLoading(true);
+    //   try {
+    //     //Get the posts from the database
+    //     // console.log("session.user.id", session.user.id);
+    //     const postResponse = await fetch("/api/posts");
+    //     const postsData = await postResponse.json();
+
+    //     console.log("postsData", postsData);
+    //     if (!postsData.success) {
+    //       console.error("Failed to fetch posts:", postsData.message);
+    //       return;
+    //     }
+    //     //Get the likes from the database
+    //     const likeResponse = await fetch(`/api/posts/likes/${postsData.id}`);
+    //     const likesData = await likeResponse.json();
+    //     if (!likesData.success) {
+    //       console.error("Failed to fetch likes:", likesData.message);
+    //       return;
+    //     }
+
+    //     const userResponse = await fetch("/api/users");
+    //     const usersData = await userResponse.json();
+    //     if (!usersData.success) {
+    //       console.error("Failed to fetch users:", usersData.message);
+    //       return;
+    //     }
+
+    //     //merge the posts, likes and users data
+    //     const mergedPosts = postsData.data.map((post) => {
+    //       let isLiked = false;
+    //       if (session) {
+    //         const likeData = likesData.data.find(
+    //           (like) =>
+    //             like.post_id === post.id && like.user_id === session.user.id
+    //         );
+    //         isLiked = !!likeData;
+    //       }
+    //       const user = usersData.data.find(
+    //         (user) => String(user.id) === String(post.user_id)
+    //       );
+    //       return {
+    //         ...post,
+    //         isLiked,
+    //         like: likesData.data.filter((like) => like.post_id === post.id)
+    //           .length,
+    //         //what to put here to get this to populate?
+    //         user,
+    //       };
+    //     });
+    //     console.log("mergedPosts", mergedPosts);
+     
+
+    //     setPosts(mergedPosts);
+    //   } catch (error) {
+    //     console.error("Error fetching posts and likes:", error);
+    //   }
+    //   setLoading(false);
+    // };
 
     fetchPostsandLikesandUsers();
   }, [session]);
@@ -217,11 +276,17 @@ const [updateImageList, setUpdateImageList] = useState([]);
 
       const data = await response.json();
       if (data.success) {
-        setPosts((prev) => [data.data, ...prev]); // Add the new post to the list
+      //   setPosts((prev) => [data.data, ...prev]); // Add the new post to the list
+      //   setImages([]); // Clear the images
+      //   setSubmittedImages([]); // Clear submitted images
+      //   showSubmitButton(false); // Hide the submit button
+      // } 
+      await fetchPostsandLikesandUsers(); // Refresh posts after submission
         setImages([]); // Clear the images
         setSubmittedImages([]); // Clear submitted images
         showSubmitButton(false); // Hide the submit button
-      } else {
+      }
+      else {
         console.error("Failed to create post:", data.message);
       }
     } catch (error) {
@@ -416,7 +481,7 @@ return (
                   <h5 className="text-stone-100 text-md alumniSansPinstripe font-bold">{post.state}</h5>
                 </div>
                 <p
-                  className="text-stone-100 text-sm flex items-center  text-center justify-center h-20"
+                  className="text-stone-100 text-lg font-bold alumniSansPinstripe flex items-center  text-center justify-center h-20"
                   style={{ lineHeight: "1.5rem" }}
                 >
                   {post.caption || "No caption available"}
