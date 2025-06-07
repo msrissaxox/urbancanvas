@@ -51,7 +51,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
           return;
         }
         //Get the likes from the database
-        const likeResponse = await fetch("/api/likes");
+        const likeResponse = await fetch(`/api/posts/likes/${postsData.id}`);
         const likesData = await likeResponse.json();
         if (!likesData.success) {
           console.error("Failed to fetch likes:", likesData.message);
@@ -158,13 +158,14 @@ const [updateImageList, setUpdateImageList] = useState([]);
   //Handle image Remove
   const onImageRemove = async (index) => {
     try {
-      const response = await fetch(`/api/posts/${posts[index].id}`, {
+      const response = await fetch(`/api/delete/${posts[index].id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
 
       const data = await response.json();
       if (data.success) {
+        console.log("Deleting post with id:", posts[index].id);
         const updatedPosts = posts.filter((_, i) => i !== index);
         setPosts(updatedPosts);
       } else {
@@ -258,8 +259,9 @@ const [updateImageList, setUpdateImageList] = useState([]);
         user_id: session.user.id, //11701069 etc
         id: post.id, // 1b77038a-4355 etc PK
         isLiked,
+   
       });
-      const response = await fetch(`/api/posts/${post.id}`, {
+      const response = await fetch(`/api/posts/likes/${post.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -306,7 +308,7 @@ return (
             {({ imageList, onImageUpload, isDragging, dragProps }) => (
               // my UI
               <>
-                // my UI
+               
                 <div className="image-item__btn-wrapper flex flex-col justify-center items-center  gap-4 mt-2">
                   {uploadButton && (
                     <button

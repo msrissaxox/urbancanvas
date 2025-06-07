@@ -1,6 +1,6 @@
 //posts routes
 //Common HTTP methods here are:
-
+//6/6/25: 5:22
 //GET: To fetch details of a single post. DONE
 //POST: To create a new post. DONE
 
@@ -10,8 +10,8 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server'; // 
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; 
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseServiceRole = process.env.SUPABASE_SERVICE_ROLE_KEY; // Use service role key for server-side operations
+const supabase = createClient(supabaseUrl, supabaseServiceRole);
 // Handle PUT request to update the like count and isLiked state
 
 //updated to use supabase client

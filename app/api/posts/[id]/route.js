@@ -1,5 +1,8 @@
 
 //This file handles the API routes for posts, including liking, unliking, and fetching posts.
+//is this a duplicate file that is not needed?
+//6/6/25
+//5:26
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
