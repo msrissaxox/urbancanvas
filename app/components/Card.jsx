@@ -14,6 +14,10 @@ export default function Card(props) {
   const maxNumber = 1; //might have to change later
   const [submitButton, showSubmitButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
+  
+  // const [updateButton, showUpdateButton] = useState(false);
+  // const [removeButton, showRemoveButton] = useState(false);
+
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [likeCount, setLikeCount] = useState("");
   const [loading, setLoading] = useState(true);
@@ -23,9 +27,9 @@ export default function Card(props) {
 const [updateImageList, setUpdateImageList] = useState([]);
 
 
-  //Modal for share button
-  const openShareModal = () => setIsShareModalOpen(true);
-  const closeShareModal = () => setIsShareModalOpen(false);
+  // //Modal for share button
+  // const openShareModal = () => setIsShareModalOpen(true);
+  // const closeShareModal = () => setIsShareModalOpen(false);
 
 
   const handleUpdateInputChange = (imgIdx, field, value) => {
@@ -96,66 +100,6 @@ const [updateImageList, setUpdateImageList] = useState([]);
 
   //fetch posts from the database
   useEffect(() => {
-    // const fetchPostsandLikesandUsers = async () => {
-    //   setLoading(true);
-    //   try {
-    //     //Get the posts from the database
-    //     // console.log("session.user.id", session.user.id);
-    //     const postResponse = await fetch("/api/posts");
-    //     const postsData = await postResponse.json();
-
-    //     console.log("postsData", postsData);
-    //     if (!postsData.success) {
-    //       console.error("Failed to fetch posts:", postsData.message);
-    //       return;
-    //     }
-    //     //Get the likes from the database
-    //     const likeResponse = await fetch(`/api/posts/likes/${postsData.id}`);
-    //     const likesData = await likeResponse.json();
-    //     if (!likesData.success) {
-    //       console.error("Failed to fetch likes:", likesData.message);
-    //       return;
-    //     }
-
-    //     const userResponse = await fetch("/api/users");
-    //     const usersData = await userResponse.json();
-    //     if (!usersData.success) {
-    //       console.error("Failed to fetch users:", usersData.message);
-    //       return;
-    //     }
-
-    //     //merge the posts, likes and users data
-    //     const mergedPosts = postsData.data.map((post) => {
-    //       let isLiked = false;
-    //       if (session) {
-    //         const likeData = likesData.data.find(
-    //           (like) =>
-    //             like.post_id === post.id && like.user_id === session.user.id
-    //         );
-    //         isLiked = !!likeData;
-    //       }
-    //       const user = usersData.data.find(
-    //         (user) => String(user.id) === String(post.user_id)
-    //       );
-    //       return {
-    //         ...post,
-    //         isLiked,
-    //         like: likesData.data.filter((like) => like.post_id === post.id)
-    //           .length,
-    //         //what to put here to get this to populate?
-    //         user,
-    //       };
-    //     });
-    //     console.log("mergedPosts", mergedPosts);
-     
-
-    //     setPosts(mergedPosts);
-    //   } catch (error) {
-    //     console.error("Error fetching posts and likes:", error);
-    //   }
-    //   setLoading(false);
-    // };
-
     fetchPostsandLikesandUsers();
   }, [session]);
 
@@ -246,7 +190,6 @@ const [updateImageList, setUpdateImageList] = useState([]);
 
   const handleSubmit = async () => {
     const isValid = images.every(
-      // (image) => image.city && image.state && image.caption && image.data_url
       (image) => image.city && image.state && image.caption && image.data_url
     );
     console.log("images", images);
@@ -460,6 +403,7 @@ return (
       {/* Display submitted images below*/}
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 pb-5 m-5 justify-center items-center">
         {posts.map((post, index) => (
+          console.log("post.user", post.user.name.split(" ")[0]),
           <div key={index} className="card">
             <img
               className="w-64 h-64 self-center rounded-badge p-2 object-cover"
@@ -467,8 +411,14 @@ return (
               alt="Uploaded"
             />
             <span className="text-stone-100 alumniSansPinstripe text-xl font-semibold flex items-center justify-center">
-              {post.user ? post.user.name : "Unknown User"}
-            </span>
+             {post.user
+    ? (() => {
+        const parts = post.user.name.trim().split(" ");
+        if (parts.length === 1) return parts[0];
+        return `${parts[0]} ${parts[1][0]}.`;
+      })()
+    : "Unknown User"}
+        </span>
 
             <div className="p-1">
               {/* Location and Actions Row */}
@@ -517,6 +467,8 @@ return (
 
               {session && post.user_id === session.user.id && (
         <div className="image-item__btn-wrapper mt-4 flex gap-2">
+          {updatingPostIndex !== index && (
+            <>
           <button
             className="text-lg px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
             onClick={() => setUpdatingPostIndex(index)}
@@ -529,110 +481,8 @@ return (
           >
             REMOVE
           </button>
-
-{/* {imageList.map((props, index) => (
-                    <div key={index} className="image-item">
-                      <img
-                        className="w-64 h-64 rounded-lg object-cover"
-                        src={props["data_url"]}
-                        alt="" />
-                      <div className="flex flex-col gap-2 pt-2">
-                        <input
-                          type="text"
-                          placeholder="City"
-                          required={true}
-                          value={props.city}
-                          onChange={(e) => handleInputChange(index, "city", e.target.value)} />
-                        <input
-                          type="text"
-                          placeholder="State"
-                          required={true}
-                          value={props.state}
-                          onChange={(e) => handleInputChange(index, "state", e.target.value)} />
-
-                        <input
-                          type="text"
-                          placeholder="Tell us how this artwork moved you"
-                          required={true}
-                          maxLength={100}
-                          minLength={10}
-                          value={props.caption}
-                          onChange={(e) => handleInputChange(index, "caption", e.target.value)} />
-
-                        {props.caption && props.caption.length < 10 && (
-                          <p className="text-red-500 alumniSansPinstripe text-sm">
-                            Caption must be at least 10 characters long.
-                          </p>
-                        )}
-
-                        {props.caption && props.caption.length > 150 && (
-                          <p className="text-red-500 alumniSansPinstripe text-sm">
-                            Caption cannot exceed 150 characters.
-                          </p>
-                    */}
-
-{/* {updatingPostIndex === index && (
-      <ImageUploading
-        value={updateImageList}
-        onChange={(imageList) => handleImageUpdate(imageList, index)}
-        maxNumber={1}
-        dataURLKey="data_url"
-      >
-        {({ onImageUpload }) => (
-          <button
-            className="mt-2 px-4 py-2 bg-stone-600 text-white rounded"
-            onClick={onImageUpload}
-            type="button"
-          >
-            Choose New Image
-          </button>
-        )}
-     
-
-{imageList.map((props, index) => (
-                    <div key={index} className="image-item">
-                      <img
-                        className="w-64 h-64 rounded-lg object-cover"
-                        src={props["data_url"]}
-                        alt="" />
-                      <div className="flex flex-col gap-2 pt-2">
-                        <input
-                          type="text"
-                          placeholder="City"
-                          required={true}
-                          value={props.city}
-                          onChange={(e) => handleInputChange(index, "city", e.target.value)} />
-                        <input
-                          type="text"
-                          placeholder="State"
-                          required={true}
-                          value={props.state}
-                          onChange={(e) => handleInputChange(index, "state", e.target.value)} />
-
-                        <input
-                          type="text"
-                          placeholder="Tell us how this artwork moved you"
-                          required={true}
-                          maxLength={100}
-                          minLength={10}
-                          value={props.caption}
-                          onChange={(e) => handleInputChange(index, "caption", e.target.value)} />
-
-                        {props.caption && props.caption.length < 10 && (
-                          <p className="text-red-500 alumniSansPinstripe text-sm">
-                            Caption must be at least 10 characters long.
-                          </p>
-                        )}
-
-                        {props.caption && props.caption.length > 150 && (
-                          <p className="text-red-500 alumniSansPinstripe text-sm">
-                            Caption cannot exceed 150 characters.
-                          </p>
-                           </ImageUploading> */}
-
-
-
-
+</>
+          )}
 {updatingPostIndex === index && (
   <ImageUploading
     value={updateImageList}
