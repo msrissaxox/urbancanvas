@@ -144,16 +144,24 @@ const [updateImageList, setUpdateImageList] = useState([]);
       updatedPosts[index] = {
         ...updatedPosts[index],
         image_url: updatedImage,
+          like: 0,           // Reset likes to 0
+       isLiked: false, 
       };
       setPosts(updatedPosts);
       setUpdatingPostIndex(null);
       setUpdateImageList([]);
+      
+          //fetch posts from the database
+  await fetchPostsandLikesandUsers(); // Refresh posts after update
+setLikeCount(0); // Reset like count for the updated post
     } else {
       console.error("Failed to update post:", data.message);
     }
   } catch (error) {
     console.error("Error updating post:", error);
   }
+
+
 };
 
   //Handle image Remove
@@ -355,6 +363,7 @@ return (
                           onChange={(e) => handleInputChange(index, "state", e.target.value)} />
 
                         <input
+                        className="mb-2"
                           type="text"
                           placeholder="Tell us how this artwork moved you"
                           required={true}
@@ -524,6 +533,7 @@ return (
               />
               <input
                 type="text"
+                className="mb-2"
                 placeholder="Tell us how this artwork moved you"
                 required={true}
                 maxLength={100}

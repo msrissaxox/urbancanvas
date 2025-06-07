@@ -18,10 +18,15 @@ export async function PUT(req, { params }) {
         // Update the post
         const { data, error } = await supabase
         .from('posts')
-        .update({ image_url, caption, city, state })
+        .update({ image_url, caption, city, state})
         .eq('id', postId)
         .select();
     
+await supabase
+  .from('likes')
+  .delete()
+  .eq('post_id', postId);
+
         if (error) {
         console.error("Error updating post:", error);
         return NextResponse.json({ success: false, message: "Failed to update post", error: error.message }, { status: 500 });
