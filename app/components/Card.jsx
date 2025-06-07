@@ -453,16 +453,16 @@ return (
               {session && post.user_id === session.user.id && (
         <div className="image-item__btn-wrapper mt-4 flex gap-2">
           <button
-            className="text-sm px-4 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
+            className="text-lg px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
             onClick={() => setUpdatingPostIndex(index)}
           >
-            Update
+            UPDATE
           </button>
           <button
-            className="text-sm px-4 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
+            className="text-lg px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
             onClick={() => onImageRemove(index)}
           >
-            Remove
+            REMOVE
           </button>
 
 {/* {imageList.map((props, index) => (
