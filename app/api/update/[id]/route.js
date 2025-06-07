@@ -7,18 +7,18 @@ const supabase = createClient(supabaseUrl, supabaseServiceRole);
 
 //Update: Handle PUT request to update a post
 export async function PUT(req, { params }) {
-    const { id: postId } = params;
-    const { title, content } = await req.json();
+    const { id: postId } = await params;
+    const { image_url, caption, city, state } = await req.json();
     
-    if (!postId || !title || !content) {
-        return NextResponse.json({ success: false, message: "Post ID, title, and content are required" }, { status: 400 });
+    if (!postId || !image_url || !caption || !city || !state) {
+        return NextResponse.json({ success: false, message: "All fields required" }, { status: 400 });
     }
     
     try {
         // Update the post
         const { data, error } = await supabase
         .from('posts')
-        .update({ title, content })
+        .update({ image_url, caption, city, state })
         .eq('id', postId)
         .select();
     

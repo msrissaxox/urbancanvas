@@ -125,12 +125,10 @@ const [updateImageList, setUpdateImageList] = useState([]);
   const state = imageList[0].state;
   const caption = imageList[0].caption;
   try {
-    const response = await fetch(`/api/posts/${posts[index].id}`, {
+    const response = await fetch(`/api/update/${posts[index].id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-         post_id: posts[index].id,
-  user_id: session.user.id,
         image_url: updatedImage,
           city,
         state,
