@@ -315,7 +315,7 @@ return (
               // my UI
               <>
                
-                <div className="image-item__btn-wrapper flex flex-col justify-center items-center  gap-4 mt-2">
+                <div className="image-item__btn-wrapper flex flex-col justify-center items-center gap-4 mt-2">
                   {uploadButton && (
                     <button
                       className="text-2xl font-bold py-3 mt-4 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
@@ -466,17 +466,17 @@ return (
               </div>
 
               {session && post.user_id === session.user.id && (
-        <div className="image-item__btn-wrapper mt-4 flex gap-2">
+        <div className="image-item__btn-wrapper mt-4 flex flex-col gap-2">
           {updatingPostIndex !== index && (
             <>
           <button
-            className="text-lg px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
+            className="text-2xl font-bold px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
             onClick={() => setUpdatingPostIndex(index)}
           >
             UPDATE
           </button>
           <button
-            className="text-lg px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
+            className="text-2xl font-bold px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
             onClick={() => onImageRemove(index)}
           >
             REMOVE
@@ -491,14 +491,14 @@ return (
     dataURLKey="data_url"
   >
     {({ imageList, onImageUpload, isDragging, dragProps }) => (
-      <div className="flex flex-col items-center gap-4 mt-2">
+      <div className="flex-col items-center gap-2">
         <button
-          className="text-2xl font-bold py-3 mt-4 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
+          className="w-full text-2xl font-bold py-3 mb-3 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 text-center"
           style={isDragging ? { color: "red" } : undefined}
           onClick={onImageUpload}
           {...dragProps}
         >
-          Choose Image
+          CHOOSE IMAGE
         </button>
         {imageList.map((img, imgIdx) => (
           <div key={imgIdx} className="image-item">
@@ -544,21 +544,21 @@ return (
             </div>
           </div>
         ))}
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full">
           <button
-            className="px-4 py-2 bg-green-600 text-white rounded"
+            className="px-4 py-2 flex-1 bg-green-900 alumniSansPinstripe text-xl text-white rounded hover:border-transparent hover:text-white hover:bg-green-700 transition duration-300"
             onClick={() => handleImageUpdate(updateImageList, index)}
           >
-            Save
+            SAVE
           </button>
           <button
-            className="px-4 py-2 bg-gray-400 text-white rounded"
+            className="px-4 py-2 flex-1  bg-gray-600 alumniSansPinstripe text-xl text-white rounded hover:border-transparent hover:text-white hover:bg-gray-700 transition duration-300"
             onClick={() => {
               setUpdatingPostIndex(null);
               setUpdateImageList([]);
             }}
           >
-            Cancel
+            CANCEL
           </button>
         </div>
       </div>
