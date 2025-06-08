@@ -87,7 +87,6 @@ export async function POST(req) {
 const { data: userResult, error: userError } = await supabase
 
 // console.log("user_id from frontend:", user_id); 
-  .schema('next_auth')
     .from('users') //selecting from users table
     .select('id') //selecting id column
     .eq('id', user_id) //where oauth_id matches the provided oauth_id

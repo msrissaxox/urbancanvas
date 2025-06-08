@@ -1,42 +1,54 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from 'app/lib/supabaseClient';
 import { NextResponse } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+// const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-function getSupabaseWithAuthToken(req) {
+// function getSupabaseWithAuthToken(req) {
+//   const authHeader = req.headers.get("authorization");
+//   const accessToken = authHeader?.split(" ")[1];
+//   return createClient(supabaseUrl, supabaseAnonKey, {
+//     global: { headers: { Authorization: `Bearer ${accessToken}` } }
+//   });
+// }
+// Helper to get the user from the JWT in the request
+async function getUserFromRequest(req) {
   const authHeader = req.headers.get("authorization");
-  const accessToken = authHeader?.split(" ")[1];
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${accessToken}` } }
-  });
+  if (!authHeader) return null;
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) return null;
+  return data.user;
 }
 
 //handle delete request to delete a post
 export async function DELETE(req, { params }) {
 
     const { id: postId } = await params;
-      const supabase = getSupabaseWithAuthToken(req);
+      // const supabase = getSupabaseWithAuthToken(req);
+  if (!postId) {
+    return NextResponse.json({ success: false, message: "Post ID is required" }, { status: 400 });
+  }
+        // console.log("Deleting post with id on route side:", postId);
+    
+    // if (!postId) {
+    //     return NextResponse.json({ success: false, message: "Post ID is required" }, { status: 400 });
+    // }
+    
+  const user = await getUserFromRequest(req);
+  if (!user) {
+    return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
+  }
 
-        console.log("Deleting post with id on route side:", postId);
-    
-    if (!postId) {
-        return NextResponse.json({ success: false, message: "Post ID is required" }, { status: 400 });
-    }
-    
     try {
         // Delete the post
 
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-console.log("Authenticated user id:", user?.id);
-//fetch the post first
         const { data: post, error: postError } = await supabase
+
         .from('posts')
        .select('user_id')
-        .eq('id', postId)
-       
+        .eq('id', postId)       
             .maybeSingle();
-                    console.log("postOwner user_id:", post?.user_id);
 
      if (postError) {
       console.error("Error fetching post:", fetchError);

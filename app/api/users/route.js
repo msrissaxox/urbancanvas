@@ -1,57 +1,65 @@
+import { supabase } from 'app/lib/supabaseClient';
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server'; // Import NextResponse for consistent response handling
 
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; 
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; 
+// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Get all users
+// Get current user
+// export async function GET(request) {
+//   // Get the access token from the Authorization header
+//   const authHeader = request.headers.get("authorization");
+//   if (!authHeader) {
+//     return NextResponse.json(
+//       { success: false, message: "No authorization header" },
+//       { status: 401 }
+//     );
+//   }
+//   const token = authHeader.replace("Bearer ", "");
+//   const { data, error } = await supabase.auth.getUser(token);
+//   if (error || !data?.user) {
+//     return NextResponse.json(
+//       { success: false, message: "Not authenticated" },
+//       { status: 401 }
+//     );
+//   }
+//   // Return only the current user
+//   return NextResponse.json({ success: true, data: data.user });
+// }
+
+
+// import { supabase } from 'app/lib/supabaseClient';
+// import { NextResponse } from 'next/server';
+
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY // Must be set in your .env
+);
+
+// export async function GET() {
+//   const { data, error } = await supabase.from('users').select('*');
+//   if (error) {
+//     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+//   }
+//   return NextResponse.json({ success: true, data });
+// }
+
 export async function GET() {
-  try {
-    console.log("Fetching users from NextAuth.js 'users' table...");
-
-    const { data: users, error } = await supabase
-     .schema('next_auth')//added
-      .from('users') // selecting from users table
-      .select('*') // selecting all columns
-
-    // pool.query("SELECT * FROM users");
-   
-if(error) {
-      console.error("Supabase error fetching users:", error.message);
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: 500 }
-      );
-    }
-    console.log("Users result (data):", users);
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Users retrieved successfully",
-        data: users,
-      },
-      { status: 200, 
-        headers: { "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Failed to fetch users",
-        error: error.message,
-      },
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+  const { data, error } = await supabaseAdmin.auth.admin.listUsers();
+  if (error) {
+    return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
+  const users = data.users.map(user => ({
+    id: user.id,
+    name: user.user_metadata?.name || user.email,
+    email: user.email,
+    image: user.user_metadata?.avatar_url || null,
+  }));
+  return NextResponse.json({ success: true, data: users });
 }
-
-
-
-
 
 // Update user profile picture
 export async function PATCH(request) {

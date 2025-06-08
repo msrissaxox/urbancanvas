@@ -3,22 +3,34 @@
 //is this a duplicate file that is not needed?
 //6/6/25
 //5:26
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from 'app/lib/supabaseClient'; // Use your shared client
 import { NextResponse } from 'next/server';
+import { get } from 'react-hook-form';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Helper to get the user from the JWT in the request
+async function getUserFromRequest(req) {
+  const authHeader = req.headers.get('authorization');
+  if (!authHeader) return null;
+  const token = authHeader.replace('Bearer ', '');
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) return null;
+  return data.user;
+}
 
 // POST: Add a like to a post
 export async function POST(req, { params }) {
   const { id: postId } = params;
-  const { userId } = await req.json();
+  const user = await getUserFromRequest(req);
 
-  if (!userId) {
-    return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
+  if (!user) {
+    return NextResponse.json({ success: false, message: "User not authenticated" }, { status: 400 });
   }
-
+  const userId = user.id;
+  
   try {
     // Check if the user has already liked this post
     const { data: existingLike } = await supabase
@@ -53,19 +65,21 @@ export async function POST(req, { params }) {
 
 // PUT: Like or unlike a post based on isLiked
 export async function PUT(req, context) {
-  const { id: postId } = await context.params;
-  const { user_id, isLiked } = await req.json();
+  const { id: postId } = context.params;
+  const user = await getUserFromRequest(req);
 
-  if (!postId || !user_id) {
-    return NextResponse.json({ success: false, message: "Missing post_id or user_id" }, { status: 400 });
+  if (!user) {
+    return NextResponse.json({ success: false, message: "User not authenticated" }, { status: 400 });
   }
+  const userId = user.id;
+  const { isLiked } = await req.json();
 
   try {
     // Check if the like already exists
     const { data: existingLike } = await supabase
       .from('likes')
       .select('id')
-      .eq('user_id', user_id)
+      .eq('user_id', userId)
       .eq('post_id', postId)
       .maybeSingle();
 
@@ -73,7 +87,7 @@ export async function PUT(req, context) {
       // Add like if not already liked
       const {error: insertError } = await supabase
       .from('likes')
-      .insert({ user_id, post_id: postId });
+      .insert({ user_id: userId, post_id: postId });
       if (insertError) {
         console.error("Error inserting like:", insertError);
         return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
@@ -84,7 +98,7 @@ export async function PUT(req, context) {
       await supabase
         .from('likes')
         .delete()
-        .eq('user_id', user_id)
+        .eq('user_id', userId)
         .eq('post_id', postId);
     }
 
@@ -107,7 +121,7 @@ export async function PUT(req, context) {
 
 // GET: Fetch a single post by ID
 export async function GET(request, { params }) {
-  const { id: postId } = params;
+  const { id: postId } = await params;
 
   try {
     const { data: post, error } = await supabase
@@ -130,11 +144,12 @@ export async function GET(request, { params }) {
 // DELETE: Remove a like from a post
 export async function DELETE(req, { params }) {
   const { id: postId } = params;
-  const { userId } = await req.json();
-
-  if (!userId) {
-    return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
+  const user = await getUserFromRequest(req);
+  
+  if (!user) {
+    return NextResponse.json({ success: false, message: "User ID is required" }, { status: 401 });
   }
+  const userId = user.id;
 
   try {
     const { data: deletedLike } = await supabase

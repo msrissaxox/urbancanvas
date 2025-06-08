@@ -5,47 +5,40 @@ import LogInNav from "./components/LogInNav/LogInNav";
 import MuralGrid from "../app/components/MuralGrid";
 import Footer from "./components/Footer/Footer";
 import CircularText from "./components/CircularText";
-import { useSession } from "next-auth/react";
-import { useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { supabase } from "app/lib/supabaseClient";
+import { useEffect, useState } from "react";
 
 
 export default function Home() {
-  const { data: session } = useSession();
-useEffect(() => {
-  if (session?.user && session?.id_token) {
-        console.log("Google ID token from session:", session.id_token); // Add this
+const [user, setUser] = useState(null);
 
-    supabase.auth.signInWithIdToken({
-      provider: "google",
-      token: session.id_token,
-    }).then(async () => {
-      // Check the Supabase Auth session
-      const { data, error } = await supabase.auth.getSession();
-      console.log("Supabase Auth session:", data.session);
-      if (error) {
-        console.error("Supabase Auth error:", error);
+  useEffect(() => {
+ supabase.auth.getSession().then(({ data: sessionData, error: sessionError }) => {
+      if (sessionError) {
+        console.error("Supabase getSession error:", sessionError);
+        setUser(null);
+        return;
       }
-
-      //Get the Supabse Auth user
-      const { data: user, error: userError } = await supabase.auth.getUser();
-      if (userError) {
-        console.error("Supabase getUser Error:", userError);
-      } else {
-      console.log("Supabase Auth user id:", user.user?.id);
+      if (!sessionData.session) {
+        setUser(null);
+        return;
       }
+      // If session exists, get the user
+      supabase.auth.getUser().then(({ data, error }) => {
+        if (error) {
+          console.error("Supabase getUser error:", error);
+          setUser(null);
+        } else {
+          setUser(data.user);
+          console.log("Supabase Auth user:", data.user);
+        }
+      });
     });
-  }
-}, [session]);
+  }, []);
 
   return (
     <div className="bg-gradient-to-tl from-stone-900 to-stone-800">
-      <LogInNav />
+      <LogInNav user={user} />
       <CircularText
         style={{
           backgroundImage: `url('/urbanmural.png')`,

@@ -1,28 +1,27 @@
 
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js';
+
+import { supabase } from 'app/lib/supabaseClient';
 import { NextResponse } from 'next/server';
-import { session } from 'next-auth/react';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
-function getSupabaseWithAuthToken(req) {
+async function getUserFromRequest(req) {
   const authHeader = req.headers.get("authorization");
-  const accessToken = authHeader?.split(" ")[1];
-  return createClient(supabaseUrl, supabaseKey, {
-    global: { headers: { Authorization: `Bearer ${accessToken}` } }
-  });
+  if (!authHeader) return null;
+  const token = authHeader.replace("Bearer ", "");
+  const { data, error } = await supabase.auth.getUser(token);
+  if (error || !data?.user) return null;
+  return data.user;
 }
+
+
 
 
 // POST: Add a like to a post
 export async function POST(req, { params }) {
-  const { id: postId } = params;
-const supabase = getSupabaseWithAuthToken(req);
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !user) {
+    const { id: postId } = params;
+  const user = await getUserFromRequest(req);
+  if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
   const user_id = user.id;
@@ -39,7 +38,7 @@ const supabase = getSupabaseWithAuthToken(req);
     if (!existingLike) {
       const { error: insertError } = await supabase
       .from('likes')
-      .insert({ user_id: user_id, post_id: postId });
+      .insert({ user_id, post_id: postId });
       if (insertError) {
         console.error("Error inserting like:", insertError);
         return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
@@ -60,21 +59,15 @@ const supabase = getSupabaseWithAuthToken(req);
 }
 
 // PUT: Like or unlike a post based on isLiked
-export async function PUT(req, context) {
-  const { id: postId } = await context.params;
+export async function PUT(req, { params }) {
+  const { id: postId } = params;
   const { isLiked } = await req.json();
+  const user = await getUserFromRequest(req);
 
-    const supabase = getSupabaseWithAuthToken(req);
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !user) {
+  if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
   const user_id = user.id;
-  // if (!postId || !user_id) {
-  //   return NextResponse.json({ success: false, message: "Missing post_id or user_id" }, { status: 400 });
-  // }
-
 
 
   try {
@@ -124,27 +117,27 @@ export async function PUT(req, context) {
 
 
 
-export async function GET() {
-  const { data, error } = await supabase.from('likes').select('*');
+// GET: Get all likes for a post (no auth needed)
+export async function GET(req, { params }) {
+  const { id: postId } = await params;
+  const { data, error } = await supabase
+    .from('likes')
+    .select('*')
+    .eq('post_id', postId);
   if (error) {
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
   return NextResponse.json({ success: true, data });
 }
 
-
 // DELETE: Remove a like from a post
 export async function DELETE(req, { params }) {
-  const { id: postId } = params;
-
-const supabase = getSupabaseWithAuthToken(req);
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
+  const { id: postId } = await params;
+  const user = await getUserFromRequest(req);
+  if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
   const user_id = user.id;
-
-
 
   try {
     const { data: deletedLike } = await supabase
@@ -171,4 +164,3 @@ const supabase = getSupabaseWithAuthToken(req);
     return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
   }
 }
-

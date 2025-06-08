@@ -1,19 +1,49 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 import ImageUploading from "react-images-uploading";
-import { IoShareSocialOutline } from "react-icons/io5";
-import ClickAwayListener from "@mui/material/ClickAwayListener";
+import { supabase } from "app/lib/supabaseClient"; // Import your Supabase client
 import { set } from "react-hook-form";
 import {createClient } from "@supabase/supabase-js";  
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+// const supabase = createClient(
+//   process.env.NEXT_PUBLIC_SUPABASE_URL,
+//   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+// );
 
 export default function Card(props) {
-  const { data: session } = useSession(); //This gets the session data from next-auth
+const [user, setUser] = useState(null);
+  useEffect(() => {
+    // This will get the current user if logged in
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user || null);
+    };
+    getUser();
+
+    // Listen for auth state changes (login/logout)
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      getUser();
+    });
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
+  }, []);
+
+
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: sessionData }) => {
+      if (sessionData?.user) {
+        supabase.auth.getUser().then(({ data, error }) => {
+          if (!error) setUser(data.user);
+          else setUser(null);
+        });
+      } else {
+        setUser(null);
+      }
+    });
+  }, []);
+
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
   const [posts, setPosts] = useState([]); // State to store posts from the database
@@ -55,34 +85,38 @@ const [updateImageList, setUpdateImageList] = useState([]);
         console.log("postsData", postsData);
         if (!postsData.success) {
           console.error("Failed to fetch posts:", postsData.message);
+           setPosts([]);
+      setLoading(false);
           return;
         }
         //Get the likes from the database
-        const likeResponse = await fetch(`/api/posts/likes/${postsData.id}`);
+        const likeResponse = await fetch(`/api/posts/likes`);
         const likesData = await likeResponse.json();
         if (!likesData.success) {
           console.error("Failed to fetch likes:", likesData.message);
+               setPosts([]);
+      setLoading(false);
           return;
         }
 
         const userResponse = await fetch("/api/users");
         const usersData = await userResponse.json();
-        if (!usersData.success) {
-          console.error("Failed to fetch users:", usersData.message);
-          return;
-        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+const accessToken = session?.access_token;
+
 
         //merge the posts, likes and users data
         const mergedPosts = postsData.data.map((post) => {
           let isLiked = false;
-          if (session) {
+          if (user) {
             const likeData = likesData.data.find(
               (like) =>
-                like.post_id === post.id && like.user_id === session.user.id
+                like.post_id === post.id && like.user_id === user.id
             );
             isLiked = !!likeData;
           }
-          const user = usersData.data.find(
+          const postUser = usersData.data.find(
             (user) => String(user.id) === String(post.user_id)
           );
           return {
@@ -91,7 +125,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
             like: likesData.data.filter((like) => like.post_id === post.id)
               .length,
             //what to put here to get this to populate?
-            user,
+            user: postUser,
           };
         });
         console.log("mergedPosts", mergedPosts);
@@ -107,7 +141,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
   //fetch posts from the database
   useEffect(() => {
     fetchPostsandLikesandUsers();
-  }, [session]);
+  }, []);
 
   
 
@@ -115,7 +149,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
     const updatedList = imageList.map((props, index) => ({
       ...images[index], // Preserve existing city, state, and caption if already set
       ...props,
-      userName: session?.user?.name || "",
+      userName: user?.user?.name || "",
       city: images[index]?.city || "",
       state: images[index]?.state || "",
       caption: images[index]?.caption || "",
@@ -173,7 +207,7 @@ setLikeCount(0); // Reset like count for the updated post
   //Handle image Remove
   const onImageRemove = async (index) => {
 
-    const { data: { session: supaSession } } = await supabase.auth.getSession();
+    const { data: { user: supaSession } } = await supabase.auth.getSession();
   const accessToken = supaSession?.access_token;
   if (!accessToken) {
     alert("Could not get Supabase access token.");
@@ -231,7 +265,7 @@ setLikeCount(0); // Reset like count for the updated post
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           //this is giving me an error
-          user_id: session.user.id, // Replace with the logged-in user's ID
+          user_id: user.id, // Replace with the logged-in user's ID
           // user_id: session?.user?.oauth_id, // Use oauth_id here
           //session?.user.id || this was there before 
           caption: images[0].caption,
@@ -266,19 +300,19 @@ setLikeCount(0); // Reset like count for the updated post
   // If it has, it will increment the like count by 1.
   // If it hasn't, it will decrement the like count by 1.
   const handleClick = async (index) => {
-    if (!session) {
+    if (!user) {
       alert("Please log in to like an image.");
       return;
     }
 
-  const { data: { session: supaSession } } = await supabase.auth.getSession();
+  const { data: { user: supaSession } } = await supabase.auth.getSession();
   const accessToken = supaSession?.access_token;
   if (!accessToken) {
     alert("Could not get Supabase access token.");
     return;
   }
 
-    console.log("user_id being sent:", session.user.id);
+    console.log("user_id being sent:", user.id);
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
 
@@ -295,7 +329,7 @@ setLikeCount(0); // Reset like count for the updated post
       // Send the updated like count to the backend
       console.log("Sending like update:", {
         post_id: post.id, //1b77038a-4355 etc PK
-        user_id: session.user.id, //11701069 etc
+        user_id: user.id, //11701069 etc
         id: post.id, // 1b77038a-4355 etc PK
         isLiked,
    
@@ -335,10 +369,11 @@ setLikeCount(0); // Reset like count for the updated post
 if (loading) {
   return <div className="text-stone-100 text-center alumniSansPinstripe text-3xl">Loading...</div>;
 }
+console.log("user:", user);
 return (
 
       <div className="App">
-        {session ? (
+        {user && (
           <ImageUploading
             multiple
             value={images}
@@ -419,7 +454,7 @@ return (
                           ))}
                         </div>
                         <div className="flex justify-center my-2">
-                          {submitButton && session && (
+                          {submitButton && user && (
                             <div className="flex justify-center my-4">
                               <button
                                 className="text-2xl font-bold px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
@@ -433,14 +468,13 @@ return (
                       </>
                     )}
                   </ImageUploading>
-                ) : (
-                  <></>
-                )}
+                ) 
+}
 
       {/* Display submitted images below*/}
       <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-5 pb-5 m-5 justify-center items-center">
         {posts.map((post, index) => (
-          console.log("post.user", post.user.name.split(" ")[0]),
+console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unknown User"),
           <div key={index} className="card">
             <img
               className="w-64 h-64 self-center rounded-badge p-2 object-cover"
@@ -502,7 +536,7 @@ return (
            
               </div>
 
-              {session && post.user_id === session.user.id && (
+              {user && post.user_id === user.id && (
         <div className="image-item__btn-wrapper mt-4 flex flex-col gap-2">
           {updatingPostIndex !== index && (
             <>
