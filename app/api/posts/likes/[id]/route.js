@@ -1,161 +1,31 @@
 
-//This file handles the API routes for managing likes on specific posts.
-// It includes endpoints for liking, unliking, and fetching posts with their like counts.
-// It uses Supabase as the backend for database operations and Next.js for server-side handling.
-
-// import { createClient } from '@supabase/supabase-js';
-// import { NextResponse } from 'next/server';
-
-// const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-// const supabase = createClient(
-//   process.env.NEXT_PUBLIC_SUPABASE_URL,
-//   supabaseServiceRoleKey
-// );
-// // POST: Add a like to a post
-// export async function POST(req, { params }) {
-//   const { id: postId } = params;
-//   const { userId } = await req.json();
-
-//   if (!userId) {
-//     return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
-//   }
-
-//   try {
-//     // Check if the user has already liked this post
-//     const { data: existingLike } = await supabase
-//       .from('likes')
-//       .select('id')
-//       .eq('post_id', postId)
-//       .eq('user_id', userId)
-//       .maybeSingle();
-
-//     if (!existingLike) {
-//       const { error: insertError } = await supabase
-//       .from('likes')
-//       .insert({ user_id: userId, post_id: postId });
-//       if (insertError) {
-//         console.error("Error inserting like:", insertError);
-//         return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
-//       }
-//     }
-
-//     // Get the updated like count
-//     const { count: likeCount } = await supabase
-//       .from('likes')
-//       .select('id', { count: 'exact', head: true })
-//       .eq('post_id', postId);
-
-//     return NextResponse.json({ success: true, message: "Post liked!", likeCount }, { status: 200 });
-//   } catch (error) {
-//     console.error("Error liking post:", error);
-//     return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
-//   }
-// }
-
-// // PUT: Like or unlike a post based on isLiked
-// export async function PUT(req, context) {
-//   const { id: postId } = await context.params;
-//   const { user_id, isLiked } = await req.json();
-
-//   if (!postId || !user_id) {
-//     return NextResponse.json({ success: false, message: "Missing post_id or user_id" }, { status: 400 });
-//   }
-
-//   try {
-//     // Check if the like already exists
-//     const { data: existingLike } = await supabase
-//       .from('likes')
-//       .select('id')
-//       .eq('user_id', user_id)
-//       .eq('post_id', postId)
-//       .maybeSingle();
-
-//     if (isLiked && !existingLike) {
-//       // Add like if not already liked
-//       const {error: insertError } = await supabase
-//       .from('likes')
-//       .insert({ user_id, post_id: postId });
-//       if (insertError) {
-//         console.error("Error inserting like:", insertError);
-//         return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
-//       }
-
-//     } else if (!isLiked && existingLike) {
-//       // Remove like if it exists
-//       await supabase
-//         .from('likes')
-//         .delete()
-//         .eq('user_id', user_id)
-//         .eq('post_id', postId);
-//     }
-
-//     // Get the updated like count
-//     const { count: likeCount } = await supabase
-//       .from('likes')
-//       .select('id', { count: 'exact', head: true })
-//       .eq('post_id', postId);
-
-//     return NextResponse.json({
-//       success: true,
-//       message: "Like count updated successfully",
-//       likeCount,
-//     }, { status: 200 });
-//   } catch (error) {
-//     console.error('Error updating like count:', error);
-//     return NextResponse.json({ success: false, message: 'Internal server error', error: error.message }, { status: 500 });
-//   }
-// }
-
-
-// // DELETE: Remove a like from a post
-// export async function DELETE(req, { params }) {
-//   const { id: postId } = params;
-//   const { userId } = await req.json();
-
-//   if (!userId) {
-//     return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
-//   }
-
-//   try {
-//     const { data: deletedLike } = await supabase
-//       .from('likes')
-//       .delete()
-//       .eq('post_id', postId)
-//       .eq('user_id', userId)
-//       .select()
-//       .maybeSingle();
-
-//     if (!deletedLike) {
-//       return NextResponse.json({ success: false, message: "Like not found" }, { status: 404 });
-//     }
-
-//     // Get the updated like count
-//     const { count: likeCount } = await supabase
-//       .from('likes')
-//       .select('id', { count: 'exact', head: true })
-//       .eq('post_id', postId);
-
-//     return NextResponse.json({ success: true, message: "Post unliked!", likeCount }, { status: 200 });
-//   } catch (error) {
-//     console.error("Error unliking post:", error);
-//     return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
-//   }
-// }
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
+import { session } from 'next-auth/react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+function getSupabaseWithAuthToken(req) {
+  const authHeader = req.headers.get("authorization");
+  const accessToken = authHeader?.split(" ")[1];
+  return createClient(supabaseUrl, supabaseKey, {
+    global: { headers: { Authorization: `Bearer ${accessToken}` } }
+  });
+}
+
+
 // POST: Add a like to a post
 export async function POST(req, { params }) {
   const { id: postId } = params;
-  const { userId } = await req.json();
+const supabase = getSupabaseWithAuthToken(req);
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-  if (!userId) {
-    return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
+  if (userError || !user) {
+    return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
+  const user_id = user.id;
 
   try {
     // Check if the user has already liked this post
@@ -163,13 +33,13 @@ export async function POST(req, { params }) {
       .from('likes')
       .select('id')
       .eq('post_id', postId)
-      .eq('user_id', userId)
+      .eq('user_id', user_id)
       .maybeSingle();
 
     if (!existingLike) {
       const { error: insertError } = await supabase
       .from('likes')
-      .insert({ user_id: userId, post_id: postId });
+      .insert({ user_id: user_id, post_id: postId });
       if (insertError) {
         console.error("Error inserting like:", insertError);
         return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
@@ -192,11 +62,20 @@ export async function POST(req, { params }) {
 // PUT: Like or unlike a post based on isLiked
 export async function PUT(req, context) {
   const { id: postId } = await context.params;
-  const { user_id, isLiked } = await req.json();
+  const { isLiked } = await req.json();
 
-  if (!postId || !user_id) {
-    return NextResponse.json({ success: false, message: "Missing post_id or user_id" }, { status: 400 });
+    const supabase = getSupabaseWithAuthToken(req);
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
+  const user_id = user.id;
+  // if (!postId || !user_id) {
+  //   return NextResponse.json({ success: false, message: "Missing post_id or user_id" }, { status: 400 });
+  // }
+
+
 
   try {
     // Check if the like already exists
@@ -243,28 +122,6 @@ export async function PUT(req, context) {
   }
 }
 
-//GET: Fetch a single post by ID
-// export async function GET(request, { params }) {
-//   const { id: postId } = params;
-
-//   try {
-//     const { data: post, error } = await supabase
-//       .from('posts')
-//       .select('*')
-//       .eq('id', postId)
-//       .maybeSingle();
-
-//     if (error || !post) {
-//       return NextResponse.json({ success: false, message: "Post not found" }, { status: 404 });
-//     }
-
-//     return NextResponse.json({ success: true, data: post }, { status: 200 });
-//   } catch (error) {
-//     console.error("Error fetching post:", error);
-//     return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
-//   }
-// }
-
 
 
 export async function GET() {
@@ -279,18 +136,22 @@ export async function GET() {
 // DELETE: Remove a like from a post
 export async function DELETE(req, { params }) {
   const { id: postId } = params;
-  const { userId } = await req.json();
 
-  if (!userId) {
-    return NextResponse.json({ success: false, message: "User ID is required" }, { status: 400 });
+const supabase = getSupabaseWithAuthToken(req);
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
+  const user_id = user.id;
+
+
 
   try {
     const { data: deletedLike } = await supabase
       .from('likes')
       .delete()
       .eq('post_id', postId)
-      .eq('user_id', userId)
+      .eq('user_id', user_id)
       .select()
       .maybeSingle();
 
@@ -310,32 +171,4 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
   }
 }
-
-// export async function GET(request, { params }) {
-//   const { id: postId } = params;
-
-//   try {
-//     const { data: post, error } = await supabase
-//       .from('posts')
-//       .select('*')
-//       .eq('id', postId)
-//       .maybeSingle();
-
-//     if (error || !post) {
-//       return NextResponse.json({ success: false, message: "Post not found" }, { status: 404 });
-//     }
-
-//     // Get the like count for the post
-//     const { count: likeCount } = await supabase
-//       .from('likes')
-//       .select('id', { count: 'exact', head: true })
-//       .eq('post_id', postId);
-
-//     return NextResponse.json({ success: true, data: { ...post, likeCount } }, { status: 200 });
-//   } catch (error) {
-//     console.error("Error fetching post:", error);
-//     return NextResponse.json({ success: false, message: "Internal server error", error: error.message }, { status: 500 });
-//   }
-// }
-
 

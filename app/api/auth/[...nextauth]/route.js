@@ -21,14 +21,16 @@ console.log("DEBUG: NEXT_PUBLIC_SUPABASE_ANON_KEY:", process.env.NEXT_PUBLIC_SUP
 console.log("DEBUG: SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "Loaded" : "UNDEFINED / NOT MATCHED");
 console.log("DEBUG: NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? "Loaded" : "UNDEFINED / NOT MATCHED");
 
-// //from supabase adapter documentation
-// export const { handlers, auth, signIn, signOut } = NextAuth({
-//   providers: [],
-//   adapter: SupabaseAdapter({
-//     url: process.env.SUPABASE_URL,
-//     secret: process.env.SUPABASE_SERVICE_ROLE_KEY,
-//   }),
-// })
+
+
+async function ensureSupabaseAuthUser(email) {
+  // Try to create the user (will fail if already exists)
+  const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+  });
+  // You may want to handle the error if user already exists
+}
 
 export const authOptions = {
   // 1. Add the Supabase Adapter
@@ -82,6 +84,27 @@ export const authOptions = {
   // These callbacks are essential for attaching Supabase Auth's UUID to your session
   // and JWT, which is useful for Row Level Security (RLS) in Supabase.
   callbacks: {
+
+    async signIn({ user, account, profile }) {
+    if (account.provider === "google") {
+      await ensureSupabaseAuthUser(user.email);
+    }
+    return true;
+  },
+
+async jwt({ token, user, account }) {
+    if (account?.provider === "google") {
+      token.id_token = account.id_token; // Save Google ID token
+    }
+    if (user) {
+      token.id = user.id;
+      token.name = user.name;
+      token.email = user.email;
+      token.image = user.image;
+    }
+    return token;
+  },
+
     async session({ session, user, token }) {
 
 const signingSecret = process.env.SUPABASE_JWT_SECRET
@@ -89,12 +112,20 @@ const signingSecret = process.env.SUPABASE_JWT_SECRET
         const payload = {
           aud: "authenticated",
           exp: Math.floor(new Date(session.expires).getTime() / 1000),
-          sub: user.id,
-          email: user.email,
+          sub: user?.id || token?.id, // Use user.id or token.id
+          email: user?.email || token?.email, // Use user.email or token.email
           role: "authenticated",
         }
         session.supabaseAccessToken = jwt.sign(payload, signingSecret)
       }
+
+    // Expose Google ID token to the session
+    if (token?.id_token) {
+      session.id_token = token.id_token;
+    }
+
+
+
       if (user) {
         // This 'user.id' is the ID from next_auth.users, which is tied to Supabase Auth's UID
         session.user.id = user.id;
@@ -110,16 +141,17 @@ const signingSecret = process.env.SUPABASE_JWT_SECRET
       }
       return session;
     },
-    async jwt({ token, user }) {
+    // ,
+    // async jwt({ token, user }) {
 
-      if (user) {
-        token.id = user.id; // Adapter's user ID (UUID)
-        token.name = user.name;
-        token.email = user.email;
-        token.image = user.image;
-      }
-      return token; // Return the token with user data
-    },
+    //   if (user) {
+    //     token.id = user.id; // Adapter's user ID (UUID)
+    //     token.name = user.name;
+    //     token.email = user.email;
+    //     token.image = user.image;
+    //   }
+    //   return token; // Return the token with user data
+    // },
   async redirect({ baseUrl }) {
     return baseUrl; // always redirect to homepage
   },
@@ -129,29 +161,8 @@ const signingSecret = process.env.SUPABASE_JWT_SECRET
       strategy: "jwt", // Use JWT for session management
     },
     secret: NEXTAUTH_SECRET, // Ensure this is set for security
-    }
-    // The `signIn` callback is generally NOT needed when using an adapter,
-    // as the adapter handles all the user creation/linking logic.
-    // Uncomment and add custom logic ONLY if you need to prevent certain users from signing in
-    // based on specific conditions *before* the adapter saves them.
-    // async signIn({ user, account, profile }) {
-    //   // For example, only allow users with a specific email domain:
-    //   // if (user.email?.endsWith('@example.com')) {
-    //   //   return true;
-    //   // } else {
-    //   //   return '/auth/error?error=AccessDenied';
-    //   // }
-    //   return true; // By default, allow sign-in if adapter is configured
-    // },
-
-
-  //4. Define Pages
-  // pages: {
-  //   signIn: '/auth/signin',
-  //   signOut: '/auth/signout',
-  //   error: '/auth/error',
-    // newUser: '/auth/new-user', // If you have a dedicated new user setup flow
-
+  }
+    
 
 // 7. Export the NextAuth handler
 const handler = NextAuth(authOptions);

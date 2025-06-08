@@ -5,6 +5,12 @@ import ImageUploading from "react-images-uploading";
 import { IoShareSocialOutline } from "react-icons/io5";
 import ClickAwayListener from "@mui/material/ClickAwayListener";
 import { set } from "react-hook-form";
+import {createClient } from "@supabase/supabase-js";  
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function Card(props) {
   const { data: session } = useSession(); //This gets the session data from next-auth
@@ -166,10 +172,21 @@ setLikeCount(0); // Reset like count for the updated post
 
   //Handle image Remove
   const onImageRemove = async (index) => {
+
+    const { data: { session: supaSession } } = await supabase.auth.getSession();
+  const accessToken = supaSession?.access_token;
+  if (!accessToken) {
+    alert("Could not get Supabase access token.");
+    return;
+  }
+  
     try {
       const response = await fetch(`/api/delete/${posts[index].id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}` // Include the session access token 
+        },
       });
 
       const data = await response.json();
@@ -253,6 +270,14 @@ setLikeCount(0); // Reset like count for the updated post
       alert("Please log in to like an image.");
       return;
     }
+
+  const { data: { session: supaSession } } = await supabase.auth.getSession();
+  const accessToken = supaSession?.access_token;
+  if (!accessToken) {
+    alert("Could not get Supabase access token.");
+    return;
+  }
+
     console.log("user_id being sent:", session.user.id);
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
@@ -277,9 +302,12 @@ setLikeCount(0); // Reset like count for the updated post
       });
       const response = await fetch(`/api/posts/likes/${post.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}` // Include the Supabase access token
+        },
         body: JSON.stringify({
-          user_id: session.user.id,
+          // user_id: session.user.id,
           isLiked,
         }),
       });
