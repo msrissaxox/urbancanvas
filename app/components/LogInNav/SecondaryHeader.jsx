@@ -1,15 +1,31 @@
 'use client';
-import React from "react";
+import {React, useState, useEffect } from "react";
 
 import WelcomeUser from './WelcomeUser';
-import { useSession } from "next-auth/react";
+// import { useSession } from "next-auth/react";
 import LoginButton from "./LoginBtn";
 import HomeBtn from "./HomeBtn";
 import Link from "next/link";
+import { supabase } from "app/lib/supabaseClient";
 
 export default function Header() {
-      const { data: session } = useSession(); //This gets the session data from next-auth
+      // const { data: session } = useSession(); //This gets the session data from next-auth
+  const [user, setUser] = useState(null);
 
+
+    useEffect(() => {
+      const getUser = async () => {
+        const { data } = await supabase.auth.getUser();
+        setUser(data?.user || null);
+      };
+      getUser();
+      const { data: listener } = supabase.auth.onAuthStateChange(() => {
+        getUser();
+      });
+      return () => {
+        listener?.subscription.unsubscribe();
+      };
+    }, []);
   return (
     <nav className="flex items-center justify-between bg-gradient-to-tl from-stone-900 to-stone-600 p-6">
         <div className="flex items-center flex-shrink-0 text-gray-300 mr-6">
@@ -23,10 +39,10 @@ export default function Header() {
         </div>
             <div className="flex flex-col items-center lg:flex-row lg:space-x-4 w-full lg:w-auto">
 
-    {session ? (  
+    {user ? (  
       <>
 
-    <WelcomeUser />
+    <WelcomeUser user={user}/>
     <HomeBtn />
     </>
     ) : (
