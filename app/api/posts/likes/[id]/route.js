@@ -39,17 +39,16 @@ export async function POST(req, { params }) {
 
   try {
     // Check if the user has already liked this post
-    const { data: existingLike } = await supabase
-      .from('likes')
-      .select('id')
-      .eq('post_id', postId)
-      .eq('user_id', user_id)
-      .maybeSingle({ 
+ const { data: existingLike } = await supabase
+  .from('likes')
+  .select('id', { 
     head: false, 
-    count: 'exact' 
-  }, { 
-    global: { headers: { Authorization: `Bearer ${token}` } } 
-  });
+    count: 'exact',
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  })
+  .eq('post_id', postId)
+  .eq('user_id', user_id)
+  .maybeSingle();
 
     if (!existingLike) {
       const { error: insertError } = await supabase
@@ -99,16 +98,15 @@ console.log("user.id from access token:", user?.id);
   try {
     // Check if the like already exists
     const { data: existingLike } = await supabase
-      .from('likes')
-      .select('id')
-      .eq('user_id', user_id)
-      .eq('post_id', postId)
-      .maybeSingle({ 
+     .from('likes')
+  .select('id', { 
     head: false, 
-    count: 'exact' 
-  }, { 
-    global: { headers: { Authorization: `Bearer ${token}` } } 
-  });
+    count: 'exact',
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  })
+  .eq('user_id', user_id)
+  .eq('post_id', postId)
+  .maybeSingle();
 
     if (isLiked && !existingLike) {
       // Add like if not already liked
@@ -127,8 +125,9 @@ console.log("user.id from access token:", user?.id);
       await supabase
         .from('likes')
         .delete()
-        .eq('user_id', user_id)
-        .eq('post_id', postId);
+.eq('user_id', user_id)
+.eq('post_id', postId)
+.select('*', { global: { headers: { Authorization: `Bearer ${token}` } } })
     }
 
     // Get the updated like count
@@ -172,7 +171,7 @@ export async function DELETE(req, { params }) {
   const authHeader = req.headers.get("authorization");
   const token = authHeader?.replace("Bearer ", "");
 
-  
+
   if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
@@ -181,16 +180,11 @@ export async function DELETE(req, { params }) {
   try {
     const { data: deletedLike } = await supabase
       .from('likes')
-      .delete()
-      .eq('post_id', postId)
-      .eq('user_id', user_id)
-      .select()
-      .maybeSingle({ 
-    head: false, 
-    count: 'exact' 
-  }, { 
-    global: { headers: { Authorization: `Bearer ${token}` } } 
-  });
+  .delete()
+  .eq('post_id', postId)
+  .eq('user_id', user_id)
+  .select('*', { global: { headers: { Authorization: `Bearer ${token}` } } })
+  .maybeSingle();
 
     if (!deletedLike) {
       return NextResponse.json({ success: false, message: "Like not found" }, { status: 404 });
