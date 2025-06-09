@@ -7,6 +7,7 @@ import Footer from "./components/Footer/Footer";
 import CircularText from "./components/CircularText";
 import { supabase } from "app/lib/supabaseClient";
 import { useEffect, useState } from "react";
+import { Analytics } from "@vercel/analytics/next"
 
 
 export default function Home( ) {
@@ -83,6 +84,7 @@ useEffect(() => {
       />
       <MuralGrid accessToken={ accessToken } user={user}/>
       <Footer />
+            <Analytics />
     </div>
   );
 }
