@@ -4,5 +4,5 @@ import React from "react";
 import Card from "./Card";
 
 export default function MuralGrid({accessToken, user}) {
-  return <Card accessToken={accessToken}  />;
+  return <Card accessToken={accessToken} user={user} />;
 }

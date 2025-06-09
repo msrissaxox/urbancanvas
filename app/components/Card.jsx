@@ -10,8 +10,8 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export default function Card({accessToken}) {
-const [user, setUser] = useState(null);
+export default function Card({accessToken, user}) {
+// const [user, setUser] = useState(null);
   useEffect(() => {
     // This will get the current user if logged in
     const getUser = async () => {
@@ -31,18 +31,18 @@ const [user, setUser] = useState(null);
 
 
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: sessionData }) => {
-      if (sessionData?.user) {
-        supabase.auth.getUser().then(({ data, error }) => {
-          if (!error) setUser(data.user);
-          else setUser(null);
-        });
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   supabase.auth.getSession().then(({ data: sessionData }) => {
+  //     if (sessionData?.user) {
+  //       supabase.auth.getUser().then(({ data, error }) => {
+  //         if (!error) setUser(data.user);
+  //         else setUser(null);
+  //       });
+  //     } else {
+  //       setUser(null);
+  //     }
+  //   });
+  // }, []);
 
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
@@ -366,7 +366,7 @@ return (
               <>
                
                 <div className="image-item__btn-wrapper flex flex-col justify-center items-center gap-4 mt-2">
-                  {uploadButton && (
+                  {user && uploadButton && (
                     <button
                       className="text-2xl font-bold py-3 mt-4 leading-none border rounded text-stone-100 alumniSansPinstripe border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
                       style={isDragging ? { color: "red" } : undefined}
