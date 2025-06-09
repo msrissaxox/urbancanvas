@@ -1,16 +1,16 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
-import { supabase } from "app/lib/supabaseClient"; // Import your Supabase client
+// import { supabase } from "app/lib/supabaseClient"; // Import your Supabase client
 import { set } from "react-hook-form";
 import {createClient } from "@supabase/supabase-js";  
 
-// const supabase = createClient(
-//   process.env.NEXT_PUBLIC_SUPABASE_URL,
-//   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-// );
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
-export default function Card(props) {
+export default function Card({accessToken}) {
 const [user, setUser] = useState(null);
   useEffect(() => {
     // This will get the current user if logged in
@@ -102,8 +102,8 @@ const [updateImageList, setUpdateImageList] = useState([]);
         const userResponse = await fetch("/api/users");
         const usersData = await userResponse.json();
 
-        const { data: { session } } = await supabase.auth.getSession();
-const accessToken = session?.access_token;
+//         const { data: { session } } = await supabase.auth.getSession();
+// const accessToken = session?.access_token;
 
 
         //merge the posts, likes and users data
@@ -207,8 +207,8 @@ setLikeCount(0); // Reset like count for the updated post
   //Handle image Remove
   const onImageRemove = async (index) => {
 
-    const { data: { user: supaSession } } = await supabase.auth.getSession();
-  const accessToken = supaSession?.access_token;
+  //   const { data: { user: supaSession } } = await supabase.auth.getSession();
+  // const accessToken = supaSession?.access_token;
   if (!accessToken) {
     alert("Could not get Supabase access token.");
     return;
@@ -304,68 +304,47 @@ setLikeCount(0); // Reset like count for the updated post
       alert("Please log in to like an image.");
       return;
     }
-
-  const { data: { user: supaSession } } = await supabase.auth.getSession();
-  const accessToken = supaSession?.access_token;
-  if (!accessToken) {
+      if (!accessToken) {
     alert("Could not get Supabase access token.");
     return;
   }
-
-    console.log("user_id being sent:", user.id);
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
-
   // Toggle the like state
   const isLiked = !post.isLiked;
-
   const newLikeCount = isLiked ? post.like + 1 : post.like - 1;
   setLikeCount(newLikeCount);
 
   updatedPosts[index] = { ...post, isLiked, like: newLikeCount };
   setPosts(updatedPosts);
+  try {
+  const response = await fetch(`/api/posts/likes/${post.id}`, {
+    method: "PUT",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${accessToken}` // Use the prop!
+    },
+    body: JSON.stringify({ isLiked }),
+  });
 
-    try {
-      // Send the updated like count to the backend
-      console.log("Sending like update:", {
-        post_id: post.id, //1b77038a-4355 etc PK
-        user_id: user.id, //11701069 etc
-        id: post.id, // 1b77038a-4355 etc PK
-        isLiked,
-   
-      });
-      const response = await fetch(`/api/posts/likes/${post.id}`, {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}` // Include the Supabase access token
-        },
-        body: JSON.stringify({
-          // user_id: session.user.id,
-          isLiked,
-        }),
-      });
 
-      if (!response.ok) {
-        console.error("Request failed:", response.url, response.status);
-
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      // Check the response from the backend
-      const data = await response.json();
-      if (!data.success) {
-        console.error("Failed to update like count:", data.message);
-        // Revert the like state if the backend update fails
-        updatedPosts[index] = { ...post, like: data.data.like };
-        setPosts(updatedPosts);
-      }
-    } catch (error) {
-      console.error("Error updating like count:", error);
-      // Revert the like state if the request fails
-      updatedPosts[index] = { ...post };
+if (!response.ok) {
+      console.error("Request failed:", response.url, response.status);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    if (!data.success) {
+      console.error("Failed to update like count:", data.message);
+      updatedPosts[index] = { ...post, like: data.data.like };
       setPosts(updatedPosts);
     }
+  } catch (error) {
+    console.error("Error updating like count:", error);
+    updatedPosts[index] = { ...post };
+    setPosts(updatedPosts);
+  }
 };
+
 if (loading) {
   return <div className="text-stone-100 text-center alumniSansPinstripe text-3xl">Loading...</div>;
 }

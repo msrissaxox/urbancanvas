@@ -11,7 +11,23 @@ export default function LogInNav() {
 
   const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState(null);
+// const [accessToken, setAccessToken] = useState(null);
 
+// useEffect(() => {
+//   const getUserAndToken = async () => {
+//     const { data: { user } } = await supabase.auth.getUser();
+//     const { data: sessionData } = await supabase.auth.getSession();
+//     setUser(user || null);
+//     setAccessToken(sessionData?.session?.access_token || null);
+//   };
+//   getUserAndToken();
+//   const { data: listener } = supabase.auth.onAuthStateChange(() => {
+//     getUserAndToken();
+//   });
+//   return () => {
+//     listener?.subscription.unsubscribe();
+//   };
+// }, []);
 
       // Fetch user on mount and on auth state change
   useEffect(() => {

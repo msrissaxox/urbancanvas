@@ -3,6 +3,6 @@ import React from "react";
 // import ImageUploading from 'react-images-uploading';
 import Card from "./Card";
 
-export default function MuralGrid() {
-  return <Card />;
+export default function MuralGrid({accessToken}) {
+  return <Card accessToken={accessToken} />;
 }

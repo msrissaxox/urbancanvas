@@ -1,14 +1,20 @@
 
-// import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
-import { supabase } from 'app/lib/supabaseClient';
+// import { supabase } from 'app/lib/supabaseClient';
 import { NextResponse } from 'next/server';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY // <-- This must be the anon key!
+);
 
 
 async function getUserFromRequest(req) {
   const authHeader = req.headers.get("authorization");
   if (!authHeader) return null;
   const token = authHeader.replace("Bearer ", "");
+  // supabase.auth.setAuth(token);
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data?.user) return null;
   return data.user;
@@ -21,6 +27,11 @@ async function getUserFromRequest(req) {
 export async function POST(req, { params }) {
     const { id: postId } = params;
   const user = await getUserFromRequest(req);
+
+  // Extract token from headers
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.replace("Bearer ", ""); 
+
   if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
@@ -33,12 +44,19 @@ export async function POST(req, { params }) {
       .select('id')
       .eq('post_id', postId)
       .eq('user_id', user_id)
-      .maybeSingle();
+      .maybeSingle({ 
+    head: false, 
+    count: 'exact' 
+  }, { 
+    global: { headers: { Authorization: `Bearer ${token}` } } 
+  });
 
     if (!existingLike) {
       const { error: insertError } = await supabase
       .from('likes')
-      .insert({ user_id, post_id: postId });
+      .insert({ user_id, post_id: postId }, { 
+    global: { headers: { Authorization: `Bearer ${token}` } } 
+  });
       if (insertError) {
         console.error("Error inserting like:", insertError);
         return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
@@ -60,9 +78,17 @@ export async function POST(req, { params }) {
 
 // PUT: Like or unlike a post based on isLiked
 export async function PUT(req, { params }) {
-  const { id: postId } = params;
+  const { id: postId } = await params;
   const { isLiked } = await req.json();
+  
+  // Extract token from headers
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.replace("Bearer ", "");
+  
   const user = await getUserFromRequest(req);
+
+
+console.log("user.id from access token:", user?.id);
 
   if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
@@ -77,13 +103,20 @@ export async function PUT(req, { params }) {
       .select('id')
       .eq('user_id', user_id)
       .eq('post_id', postId)
-      .maybeSingle();
+      .maybeSingle({ 
+    head: false, 
+    count: 'exact' 
+  }, { 
+    global: { headers: { Authorization: `Bearer ${token}` } } 
+  });
 
     if (isLiked && !existingLike) {
       // Add like if not already liked
       const {error: insertError } = await supabase
       .from('likes')
-      .insert({ user_id, post_id: postId });
+      .insert({ user_id, post_id: postId }, { 
+    global: { headers: { Authorization: `Bearer ${token}` } } 
+  });
       if (insertError) {
         console.error("Error inserting like:", insertError);
         return NextResponse.json({ success: false, message: "Failed to like post", error: insertError.message }, { status: 500 });
@@ -134,6 +167,12 @@ export async function GET(req, { params }) {
 export async function DELETE(req, { params }) {
   const { id: postId } = await params;
   const user = await getUserFromRequest(req);
+
+  // Extract token from headers
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.replace("Bearer ", "");
+
+  
   if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
@@ -146,7 +185,12 @@ export async function DELETE(req, { params }) {
       .eq('post_id', postId)
       .eq('user_id', user_id)
       .select()
-      .maybeSingle();
+      .maybeSingle({ 
+    head: false, 
+    count: 'exact' 
+  }, { 
+    global: { headers: { Authorization: `Bearer ${token}` } } 
+  });
 
     if (!deletedLike) {
       return NextResponse.json({ success: false, message: "Like not found" }, { status: 404 });

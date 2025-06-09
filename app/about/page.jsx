@@ -1,6 +1,5 @@
 //about page for the Urban Mural app
 import React from "react";
-import Link from "next/link";
 import SecondaryHeader from "app/components/LogInNav/SecondaryHeader";
 import Footer from "app/components/Footer/Footer";
 export default function About() {
