@@ -9,10 +9,49 @@ import { supabase } from "app/lib/supabaseClient";
 import { useEffect, useState } from "react";
 
 
-export default function Home() {
+export default function Home( ) {
 const [user, setUser] = useState(null);
 const [accessToken, setAccessToken] = useState(null);
 
+// useEffect(() => {
+//   const getUserAndToken = async () => {
+//     const { data: { user } } = await supabase.auth.getUser();
+//     const { data: sessionData } = await supabase.auth.getSession();
+//     setUser(user || null);
+//     setAccessToken(sessionData?.session?.access_token || null);
+//   };
+//   getUserAndToken();
+//   const { data: listener } = supabase.auth.onAuthStateChange(() => {
+//     getUserAndToken();
+//   });
+//   return () => {
+//     listener?.subscription.unsubscribe();
+//   };
+// }, []);
+
+//   useEffect(() => {
+//  supabase.auth.getSession().then(({ data: sessionData, error: sessionError }) => {
+//       if (sessionError) {
+//         console.error("Supabase getSession error:", sessionError);
+//         setUser(null);
+//         return;
+//       }
+//       if (!sessionData.session) {
+//         setUser(null);
+//         return;
+//       }
+//       // If session exists, get the user
+//       supabase.auth.getUser().then(({ data, error }) => {
+//         if (error) {
+//           console.error("Supabase getUser error:", error);
+//           setUser(null);
+//         } else {
+//           setUser(data.user);
+//           console.log("Supabase Auth user:", data.user);
+//         }
+//       });
+//     });
+//   }, []);
 useEffect(() => {
   const getUserAndToken = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -21,37 +60,15 @@ useEffect(() => {
     setAccessToken(sessionData?.session?.access_token || null);
   };
   getUserAndToken();
+
   const { data: listener } = supabase.auth.onAuthStateChange(() => {
     getUserAndToken();
   });
+
   return () => {
     listener?.subscription.unsubscribe();
   };
 }, []);
-
-  useEffect(() => {
- supabase.auth.getSession().then(({ data: sessionData, error: sessionError }) => {
-      if (sessionError) {
-        console.error("Supabase getSession error:", sessionError);
-        setUser(null);
-        return;
-      }
-      if (!sessionData.session) {
-        setUser(null);
-        return;
-      }
-      // If session exists, get the user
-      supabase.auth.getUser().then(({ data, error }) => {
-        if (error) {
-          console.error("Supabase getUser error:", error);
-          setUser(null);
-        } else {
-          setUser(data.user);
-          console.log("Supabase Auth user:", data.user);
-        }
-      });
-    });
-  }, []);
 
   return (
     <div className="bg-gradient-to-tl from-stone-900 to-stone-800">
@@ -64,7 +81,7 @@ useEffect(() => {
           paddingTop: "75px",
         }}
       />
-      <MuralGrid accessToken={ accessToken }/>
+      <MuralGrid accessToken={ accessToken } user={user}/>
       <Footer />
     </div>
   );
