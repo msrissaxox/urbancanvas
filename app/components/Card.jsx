@@ -434,13 +434,13 @@ return (
                           onChange={(e) => handleInputChange(index, "caption", e.target.value)} />
 
                         {props.caption && props.caption.length < 10 && (
-                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                          <p className="text-red-500 alumniSansPinstripe text-lg">
                             Caption must be at least 10 characters long.
                           </p>
                         )}
 
                         {props.caption && props.caption.length > 150 && (
-                          <p className="text-red-500 alumniSansPinstripe text-sm">
+                          <p className="text-red-500 alumniSansPinstripe text-lg">
                             Caption cannot exceed 150 characters.
                           </p>
                         )}
@@ -628,12 +628,12 @@ console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unkno
                 onChange={e => handleUpdateInputChange(imgIdx, "caption", e.target.value)}
               />
               {img.caption && img.caption.length < 10 && (
-                <p className="text-red-500 alumniSansPinstripe text-sm">
+                <p className="text-red-500 alumniSansPinstripe text-lg">
                   Caption must be at least 10 characters long.
                 </p>
               )}
               {img.caption && img.caption.length > 150 && (
-                <p className="text-red-500 alumniSansPinstripe text-sm">
+                <p className="text-red-500 alumniSansPinstripe text-lg">
                   Caption cannot exceed 150 characters.
                 </p>
               )}
