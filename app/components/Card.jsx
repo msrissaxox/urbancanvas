@@ -51,8 +51,7 @@ export default function Card({accessToken, user}) {
   const [cancelButton, showCancelButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
   
-  // const [updateButton, showUpdateButton] = useState(false);
-  // const [removeButton, showRemoveButton] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [likeCount, setLikeCount] = useState("");
@@ -256,6 +255,9 @@ setLikeCount(0); // Reset like count for the updated post
   //handle submit button
 
   const handleSubmit = async () => {
+      if (submitting) return; // Prevent double submit
+  setSubmitting(true);
+
     const isValid = images.every(
       (image) => image.city && image.state && image.caption && image.data_url
     );
@@ -299,6 +301,8 @@ setLikeCount(0); // Reset like count for the updated post
     } catch (error) {
       console.error("Error creating post:", error);
     }
+      setSubmitting(false); // Always re-enable after done
+
   };
 
   //This function checks to see if the like button has been clicked.
@@ -453,8 +457,11 @@ return (
                               <button
                                 className="text-2xl font-bold px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
                                 onClick={handleSubmit}
+                                  disabled={submitting}
+
                               >
-                                SUBMIT
+                                  {submitting ? "Submitting..." : "SUBMIT"}
+
                               </button>
                             </div>
                           )}
