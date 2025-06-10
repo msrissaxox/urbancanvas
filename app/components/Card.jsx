@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
 // import { supabase } from "app/lib/supabaseClient"; // Import your Supabase client
-import { set } from "react-hook-form";
+// import { set } from "react-hook-form";
 import {createClient } from "@supabase/supabase-js";  
 
 const supabase = createClient(
@@ -11,23 +11,22 @@ const supabase = createClient(
 );
 
 export default function Card({accessToken, user}) {
-// const [user, setUser] = useState(null);
-  useEffect(() => {
-    // This will get the current user if logged in
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user || null);
-    };
-    getUser();
+  // useEffect(() => {
+  //   // This will get the current user if logged in
+  //   const getUser = async () => {
+  //     const { data: { user } } = await supabase.auth.getUser();
+  //     setUser(user || null);
+  //   };
+  //   getUser();
 
-    // Listen for auth state changes (login/logout)
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      getUser();
-    });
-    return () => {
-      listener?.subscription.unsubscribe();
-    };
-  }, []);
+  //   // Listen for auth state changes (login/logout)
+  //   const { data: listener } = supabase.auth.onAuthStateChange(() => {
+  //     getUser();
+  //   });
+  //   return () => {
+  //     listener?.subscription.unsubscribe();
+  //   };
+  // }, []);
 
 
 
@@ -49,6 +48,7 @@ export default function Card({accessToken, user}) {
   const [posts, setPosts] = useState([]); // State to store posts from the database
   const maxNumber = 1; //might have to change later
   const [submitButton, showSubmitButton] = useState(false);
+  const [cancelButton, showCancelButton] = useState(false);
   const [uploadButton, showUploadButton] = useState(true);
   
   // const [updateButton, showUpdateButton] = useState(false);
@@ -107,9 +107,17 @@ const [updateImageList, setUpdateImageList] = useState([]);
 
 
         //merge the posts, likes and users data
+
+//         useEffect(() => {
+//   if (user) {
+//     fetchPostsandLikesandUsers();
+//   }
+// }, [user]);
+
         const mergedPosts = postsData.data.map((post) => {
           let isLiked = false;
           if (user) {
+   
             const likeData = likesData.data.find(
               (like) =>
                 like.post_id === post.id && like.user_id === user.id
@@ -154,7 +162,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
       state: images[index]?.state || "",
       caption: images[index]?.caption || "",
       isLiked: images[index]?.isLiked || false,
-      like: images[index]?.like || 0,
+      like: images[index]?.like,
     }));
     setImages(updatedList);
   };
@@ -278,15 +286,12 @@ setLikeCount(0); // Reset like count for the updated post
 
       const data = await response.json();
       if (data.success) {
-      //   setPosts((prev) => [data.data, ...prev]); // Add the new post to the list
-      //   setImages([]); // Clear the images
-      //   setSubmittedImages([]); // Clear submitted images
-      //   showSubmitButton(false); // Hide the submit button
-      // } 
+
       await fetchPostsandLikesandUsers(); // Refresh posts after submission
         setImages([]); // Clear the images
         setSubmittedImages([]); // Clear submitted images
         showSubmitButton(false); // Hide the submit button
+        showCancelButton(false); // Hide the cancel button
       }
       else {
         console.error("Failed to create post:", data.message);
@@ -310,6 +315,12 @@ setLikeCount(0); // Reset like count for the updated post
   }
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
+
+  // If already liked, do nothing
+  if (post.isLiked) {
+    return;
+  }
+
   // Toggle the like state
   const isLiked = !post.isLiked;
   const newLikeCount = isLiked ? post.like + 1 : post.like - 1;
@@ -373,6 +384,7 @@ return (
                       onClick={() => {
                         onImageUpload();
                         showSubmitButton(true);
+                        showCancelButton(true); // Show the Cancel button
                         showUploadButton(false);
                         setTimeout(() => {
                           showUploadButton(true); // Show the Upload button again
@@ -392,12 +404,15 @@ return (
                         alt="" />
                       <div className="flex flex-col gap-2 pt-2">
                         <input
+                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
+
                           type="text"
                           placeholder="City"
                           required={true}
                           value={props.city}
                           onChange={(e) => handleInputChange(index, "city", e.target.value)} />
                         <input
+                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
                           type="text"
                           placeholder="State"
                           required={true}
@@ -405,7 +420,7 @@ return (
                           onChange={(e) => handleInputChange(index, "state", e.target.value)} />
 
                         <input
-                        className="mb-2"
+                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
                           type="text"
                           placeholder="Tell us how this artwork moved you"
                           required={true}
@@ -443,6 +458,24 @@ return (
                               </button>
                             </div>
                           )}
+</div>
+<div>
+                          {cancelButton && user && (
+                            <div className="flex justify-center my-4">
+                              <button
+                                className="text-2xl font-bold px-4 py-2 leading-none border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300 w-32 text-center"
+                             onClick={() => {
+  setImages([]);
+  setSubmittedImages([]);
+  showSubmitButton(false);
+  showCancelButton(false);                    
+                                }}
+                              >
+                                CANCEL
+                              </button>
+                            </div>
+                          )}
+
                         </div>
                       </>
                     )}
@@ -559,6 +592,8 @@ console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unkno
             />
             <div className="flex flex-col gap-2 pt-2">
               <input
+                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
+
                 type="text"
                 placeholder="City"
                 required={true}
@@ -566,6 +601,9 @@ console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unkno
                 onChange={e => handleUpdateInputChange(imgIdx, "city", e.target.value)}
               />
               <input
+                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
+
+
                 type="text"
                 placeholder="State"
                 required={true}
@@ -574,7 +612,7 @@ console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unkno
               />
               <input
                 type="text"
-                className="mb-2"
+                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
                 placeholder="Tell us how this artwork moved you"
                 required={true}
                 maxLength={100}
