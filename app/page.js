@@ -11,53 +11,14 @@ import { Analytics } from "@vercel/analytics/next"
 
 
 export default function Home( ) {
-const [user, setUser] = useState(null);
-const [accessToken, setAccessToken] = useState(null);
+const [user, setUser] = useState(undefined);
+const [accessToken, setAccessToken] = useState(undefined);
 
-// useEffect(() => {
-//   const getUserAndToken = async () => {
-//     const { data: { user } } = await supabase.auth.getUser();
-//     const { data: sessionData } = await supabase.auth.getSession();
-//     setUser(user || null);
-//     setAccessToken(sessionData?.session?.access_token || null);
-//   };
-//   getUserAndToken();
-//   const { data: listener } = supabase.auth.onAuthStateChange(() => {
-//     getUserAndToken();
-//   });
-//   return () => {
-//     listener?.subscription.unsubscribe();
-//   };
-// }, []);
-
-//   useEffect(() => {
-//  supabase.auth.getSession().then(({ data: sessionData, error: sessionError }) => {
-//       if (sessionError) {
-//         console.error("Supabase getSession error:", sessionError);
-//         setUser(null);
-//         return;
-//       }
-//       if (!sessionData.session) {
-//         setUser(null);
-//         return;
-//       }
-//       // If session exists, get the user
-//       supabase.auth.getUser().then(({ data, error }) => {
-//         if (error) {
-//           console.error("Supabase getUser error:", error);
-//           setUser(null);
-//         } else {
-//           setUser(data.user);
-//           console.log("Supabase Auth user:", data.user);
-//         }
-//       });
-//     });
-//   }, []);
 useEffect(() => {
   const getUserAndToken = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     const { data: sessionData } = await supabase.auth.getSession();
-    setUser(user || null);
+    setUser(user);
     setAccessToken(sessionData?.session?.access_token || null);
   };
   getUserAndToken();
@@ -71,6 +32,13 @@ useEffect(() => {
   };
 }, []);
 
+
+  // Wait for user to be loaded (undefined means loading)
+  if (user === undefined) {
+    return <div className="text-stone-100 text-center text-2xl">Loading...</div>;
+  }
+
+  
   return (
     <div className="bg-gradient-to-tl from-stone-900 to-stone-800">
       <LogInNav user={user} />

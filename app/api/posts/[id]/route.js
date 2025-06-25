@@ -7,10 +7,6 @@ import { supabase } from 'app/lib/supabaseClient'; // Use your shared client
 import { NextResponse } from 'next/server';
 import { get } from 'react-hook-form';
 
-// const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-// const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-// const supabase = createClient(supabaseUrl, supabaseKey);
-
 // Helper to get the user from the JWT in the request
 async function getUserFromRequest(req) {
   const authHeader = req.headers.get('authorization');
@@ -20,7 +16,6 @@ async function getUserFromRequest(req) {
   if (error || !data?.user) return null;
   return data.user;
 }
-
 // POST: Add a like to a post
 export async function POST(req, { params }) {
   const { id: postId } = params;

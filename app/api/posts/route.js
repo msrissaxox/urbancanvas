@@ -60,7 +60,6 @@ export async function GET() {
   }
 }
 
-
 //this is the POST method to create a new post
 // It expects a JSON body with user_id, caption, city, state, and image_url.
 // It validates the input, checks if the user exists, and then inserts a new post into the database.
@@ -82,7 +81,6 @@ export async function POST(req) {
 
         console.log("user_id from frontend:", user_id);
 
-
 //updated to use supabase client
 const { data: userResult, error: userError } = await supabase
 
@@ -91,7 +89,6 @@ const { data: userResult, error: userError } = await supabase
     .select('id') //selecting id column
     .eq('id', user_id) //where oauth_id matches the provided oauth_id
     .maybeSingle(); // Expecting a single user
-
 
 if(userError){
     console.error("Supabase error fetching user by id:", userError.message);
@@ -107,7 +104,6 @@ if(userError){
         { status: 404 }
       );
     }
-
 
     const {data: insertedPost, error: postError } = await supabase
     .from('posts') //selecting from posts table

@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
-// import { supabase } from "app/lib/supabaseClient"; // Import your Supabase client
-// import { set } from "react-hook-form";
 import {createClient } from "@supabase/supabase-js";  
 
 const supabase = createClient(
@@ -11,38 +9,8 @@ const supabase = createClient(
 );
 
 export default function Card({accessToken, user}) {
-  // useEffect(() => {
-  //   // This will get the current user if logged in
-  //   const getUser = async () => {
-  //     const { data: { user } } = await supabase.auth.getUser();
-  //     setUser(user || null);
-  //   };
-  //   getUser();
-
-  //   // Listen for auth state changes (login/logout)
-  //   const { data: listener } = supabase.auth.onAuthStateChange(() => {
-  //     getUser();
-  //   });
-  //   return () => {
-  //     listener?.subscription.unsubscribe();
-  //   };
-  // }, []);
-
-
-
-  // useEffect(() => {
-  //   supabase.auth.getSession().then(({ data: sessionData }) => {
-  //     if (sessionData?.user) {
-  //       supabase.auth.getUser().then(({ data, error }) => {
-  //         if (!error) setUser(data.user);
-  //         else setUser(null);
-  //       });
-  //     } else {
-  //       setUser(null);
-  //     }
-  //   });
-  // }, []);
-
+  console.log("Card user prop:", user);
+ 
   const [images, setImages] = useState([]);
   const [submittedImages, setSubmittedImages] = useState([]);
   const [posts, setPosts] = useState([]); // State to store posts from the database
@@ -101,17 +69,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
         const userResponse = await fetch("/api/users");
         const usersData = await userResponse.json();
 
-//         const { data: { session } } = await supabase.auth.getSession();
-// const accessToken = session?.access_token;
 
-
-        //merge the posts, likes and users data
-
-//         useEffect(() => {
-//   if (user) {
-//     fetchPostsandLikesandUsers();
-//   }
-// }, [user]);
 
         const mergedPosts = postsData.data.map((post) => {
           let isLiked = false;
@@ -148,7 +106,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
   //fetch posts from the database
   useEffect(() => {
     fetchPostsandLikesandUsers();
-  }, []);
+  }, [user]);
 
   
 
@@ -156,7 +114,7 @@ const [updateImageList, setUpdateImageList] = useState([]);
     const updatedList = imageList.map((props, index) => ({
       ...images[index], // Preserve existing city, state, and caption if already set
       ...props,
-      userName: user?.user?.name || "",
+      userName: user?.name || "",
       city: images[index]?.city || "",
       state: images[index]?.state || "",
       caption: images[index]?.caption || "",
@@ -207,8 +165,6 @@ setLikeCount(0); // Reset like count for the updated post
   } catch (error) {
     console.error("Error updating post:", error);
   }
-
-
 };
 
   //Handle image Remove
@@ -320,10 +276,12 @@ setLikeCount(0); // Reset like count for the updated post
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
 
-  // If already liked, do nothing
-  if (post.isLiked) {
-    return;
-  }
+  // // If already liked, do nothing
+  // if (post.isLiked) {
+    
+
+  //   return;
+  // }
 
   // Toggle the like state
   const isLiked = !post.isLiked;
@@ -608,9 +566,7 @@ console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unkno
                 onChange={e => handleUpdateInputChange(imgIdx, "city", e.target.value)}
               />
               <input
-                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
-
-
+                className="mt-2 mb-2 text-md py-2 w-full rounded"
                 type="text"
                 placeholder="State"
                 required={true}
@@ -619,7 +575,7 @@ console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unkno
               />
               <input
                 type="text"
-                                        className="mt-2 mb-2 text-md py-2 w-full rounded"
+                className="mt-2 mb-2 text-md py-2 w-full rounded"
                 placeholder="Tell us how this artwork moved you"
                 required={true}
                 maxLength={100}
@@ -661,8 +617,6 @@ console.log("post.user", post.user?.name ? post.user.name.split(" ")[0] : "Unkno
     )}
   </ImageUploading>
 )}
-
-
         </div>
       )}
             </div>

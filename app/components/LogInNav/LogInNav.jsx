@@ -11,38 +11,89 @@ export default function LogInNav() {
 
   const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState(null);
-// const [accessToken, setAccessToken] = useState(null);
 
-// useEffect(() => {
-//   const getUserAndToken = async () => {
-//     const { data: { user } } = await supabase.auth.getUser();
-//     const { data: sessionData } = await supabase.auth.getSession();
-//     setUser(user || null);
-//     setAccessToken(sessionData?.session?.access_token || null);
-//   };
-//   getUserAndToken();
-//   const { data: listener } = supabase.auth.onAuthStateChange(() => {
-//     getUserAndToken();
-//   });
-//   return () => {
-//     listener?.subscription.unsubscribe();
-//   };
-// }, []);
+//Function to create or update the user's profile in the public.users table
+const createOrUpdateUserProfile = async (authUser) => {
+  if (!authUser) {
+    console.warn("creatreOrUpdateUserProfile called with no authenticated user ");
+    return;
+  }
 
+  try {
+    console.log('Attempting to create or update user profile for:', authUser.id);
+  
+    const {data, error } = await supabase
+      .from("users")
+      .upsert({
+        id: authUser.id,
+        email: authUser.email,
+        name: authUser.user_metadata.full_name || authUser.email,
+        image: authUser.user_metadata.avatar_url || null,
+        "emailVerified": authUser.email_verified_at || null, // Corrected to use email_verified_at
+},
+{
+   onConflict: 'id', // If a row with this 'id' already exists, update it instead of inserting
+            ignoreDuplicates: false // Ensure existing records are updated
+          }
+
+        );
+         if (error) {
+        console.error('Error upserting user profile:', error.message);
+        // setProfileError(error.message); // Optional: Set error state
+      } else {
+        console.log('User profile upserted successfully:', data);
+      }
+    } catch (err) {
+      console.error('Unexpected error during profile upsert:', err);
+      // setProfileError("An unexpected error occurred."); // Optional: Set error state
+    } finally {
+      // setProfileLoading(false); // Optional: Clear loading state
+    }
+  };
       // Fetch user on mount and on auth state change
   useEffect(() => {
     const getUser = async () => {
       const { data } = await supabase.auth.getUser();
-      setUser(data?.user || null);
+
+           const currentUser = data?.user || null;
+      setUser(currentUser); // Update React state
+
+      // ************* CALLING THE FUNCTION HERE *************
+      if (currentUser) {
+        await createOrUpdateUserProfile(currentUser);
+      }
     };
+  
     getUser();
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      getUser();
-    });
+
+
+    // const { data: listener } = supabase.auth.onAuthStateChange(() => {
+    //   getUser();
+    // });
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        const currentUser = session?.user || null;
+        setUser(currentUser); // Update React state
+
+        // ************* CALLING THE FUNCTION HERE *************
+        // If a user just signed in, create or update their profile in public.users
+        if (event === 'SIGNED_IN' && currentUser) {
+          await createOrUpdateUserProfile(currentUser);
+        }
+        // You might also handle 'SIGNED_OUT' here if needed,
+        // though `setUser(null)` already handles clearing the user state.
+      }
+    );
+
+
+   // Clean up the subscription when the component unmounts
     return () => {
-      listener?.subscription.unsubscribe();
+      // Use the 'subscription' object that was returned from onAuthStateChange
+      subscription?.unsubscribe();
     };
-  }, []);
+  }, []); // Empty dependency array means this effect runs once on mount
 
 
   const handleLogin = async () => {

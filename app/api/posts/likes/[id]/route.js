@@ -1,16 +1,37 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// import { supabase } from 'app/lib/supabaseClient';
 import { NextResponse } from 'next/server';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY // <-- This must be the anon key!
-);
+// const supabase = createClient(
+//   process.env.NEXT_PUBLIC_SUPABASE_URL,
+//   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY, // <-- This must be the anon key!
+//   {
+//     global: {
+//       headers: {
+//         Authorization: req.headers.authorization, // Pass the user's token
+//       },
+//     },
+//   }
+// );
+function getSupabase(req) {
+  const authHeader = req.headers.get("authorization");
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      global: {
+        headers: {
+          Authorization: authHeader,
+        },
+      },
+    }
+  );
+}
 
 
 async function getUserFromRequest(req) {
+  const supabase = getSupabase(req);
   const authHeader = req.headers.get("authorization");
   if (!authHeader) return null;
   const token = authHeader.replace("Bearer ", "");
@@ -20,11 +41,10 @@ async function getUserFromRequest(req) {
   return data.user;
 }
 
-
-
-
 // POST: Add a like to a post
 export async function POST(req, { params }) {
+    const supabase = getSupabase(req);
+
     const { id: postId } = params;
   const user = await getUserFromRequest(req);
 
@@ -77,6 +97,8 @@ export async function POST(req, { params }) {
 
 // PUT: Like or unlike a post based on isLiked
 export async function PUT(req, { params }) {
+    const supabase = getSupabase(req);
+
   const { id: postId } = await params;
   const { isLiked } = await req.json();
   
@@ -86,14 +108,12 @@ export async function PUT(req, { params }) {
   
   const user = await getUserFromRequest(req);
 
-
 console.log("user.id from access token:", user?.id);
 
   if (!user) {
     return NextResponse.json({ success: false, message: "Not authenticated" }, { status: 401 });
   }
   const user_id = user.id;
-
 
   try {
     // Check if the like already exists
@@ -147,10 +167,10 @@ console.log("user.id from access token:", user?.id);
   }
 }
 
-
-
 // GET: Get all likes for a post (no auth needed)
 export async function GET(req, { params }) {
+    const supabase = getSupabase(req);
+
   const { id: postId } = await params;
   const { data, error } = await supabase
     .from('likes')
@@ -164,6 +184,8 @@ export async function GET(req, { params }) {
 
 // DELETE: Remove a like from a post
 export async function DELETE(req, { params }) {
+    const supabase = getSupabase(req);
+
   const { id: postId } = await params;
   const user = await getUserFromRequest(req);
 
