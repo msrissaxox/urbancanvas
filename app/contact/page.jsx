@@ -27,11 +27,11 @@ export default function Contact() {
     <SecondaryHeader />
     <h1 className="text-6xl alumniSansPinstripe font-bold text-stone-100 text-center p-10">Contact Urban Mural</h1>
     <img src="/orlandoMural.jpg" alt="Mural contact page"
-className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow-[0_0_20px_rgba(255,255,255,0.1)]"/>
+  className="mx-auto mt-4 mb-8 w-11/12 sm:w-4/5 md:w-2/3 lg:w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow-[0_0_20px_rgba(255,255,255,0.1)]"></img>
 
 
     <div className="bg-gradient-to-tl from-stone-900 to-stone-800 h-full py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-gradient-to-tl from-stone-100 to-stone-200 shadow-md rounded-lg p-6">
+      <div className="max-w-md mx-auto bg-gradient-to-tl from-stone-700 to-stone-200 shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
           Let's Connect
         </h2>
@@ -57,7 +57,7 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
                   required: "First name is required",
                 })}
                 id="firstName"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
+        className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
               />
               {errors.firstName && (
                 <span className="text-red-500 text-sm">
@@ -79,7 +79,7 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
                 name="lastName"
                 {...register("lastName")}
                 id="lastName"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
+        className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
               />
             </label>
           </div>
@@ -96,7 +96,7 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
                 placeholder="Email Address"
                 {...register("email", { required: "Email is required" })}
                 id="email"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
+        className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
               />
               {errors.email && (
                 <span className="text-red-500 text-sm">
@@ -113,6 +113,8 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
             >
               Message:
               <textarea
+                      className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
+
                 {...register("text", {
                   required: "Please enter your message",
                   minLength: {
@@ -124,7 +126,8 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
                 placeholder="Your message here"
                 name="message"
                 rows={4}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
+            
+
               />
               {errors.text && (
                 <span className="text-red-500 text-sm">
@@ -146,7 +149,7 @@ className="mx-auto mt-4 mb-8 w-1/2 h-auto rounded-lg ring-2 ring-white/30 shadow
                 name="linkedIn"
                 {...register("linkedIn")}
                 id="linkedin"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
+        className="mt-1 block w-full p-2 rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
               />
             </label>
           </div>
