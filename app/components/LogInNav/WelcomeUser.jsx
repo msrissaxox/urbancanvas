@@ -10,7 +10,7 @@ const userName = user.user_metadata?.full_name || user.email || "User";
   return (
     <div>
      
-          <h2 className="alumniSansPinstripe text-stone-100 text-2xl">
+          <h2 className="alumniSansPinstripe text-stone-100 text-xl md:text-3xl">
             Welcome, {firstName ? `${firstName}` : 'Guest! Please log in.'}
           </h2>
     </div>
