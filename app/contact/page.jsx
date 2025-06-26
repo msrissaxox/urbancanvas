@@ -10,6 +10,8 @@ export default function Contact() {
     register,
     handleSubmit,
     formState: { errors },
+        reset, // Destructure reset to clear the form after submission
+
   } = useForm({
     defaultValues: {
       firstName: "",
@@ -17,10 +19,53 @@ export default function Contact() {
       email: "",
       text: "",
       linkedIn: "",
-      honeypot: "", // Honeypot field for spam prevention
+      _honeypot: "", // Honeypot field for spam prevention
     },
   });
 //   const onSubmit = (data) => console.log(data);
+
+  // This function will be called ONLY if React Hook Form's validation passes
+  const onSubmit = async (data) => {
+    console.log("Form data before sending:", data);
+
+
+        // FormSubmit.co expects data in a FormData object when submitting via fetch/XHR
+    const formData = new FormData();
+    for (const key in data) {
+      formData.append(key, data[key]);
+    }
+
+    try {
+      // const response = await fetch("https://formsubmit.co/72bda65f88d7101393a2c07130d85fd4", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+
+      const response = await fetch("https://formsubmit.co/ajax/72bda65f88d7101393a2c07130d85fd4", {
+  method: "POST",
+  headers: {
+    'Accept': 'application/json',
+  },
+  body: formData,
+});
+
+
+      if (response.ok) {
+        console.log("Form submitted successfully!");
+        // FormSubmit.co typically handles redirects for success
+    
+        alert("Thank you for your message! We will get back to you shortly.");
+        reset(); // Clear the form fields after successful submission
+        // If FormSubmit.co's redirect is not working, you might try a manual redirect:
+      } else {
+        console.error("Form submission failed:", response.statusText);
+        alert("There was an error submitting your form. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during form submission:", error);
+      alert("An unexpected error occurred. Please try again.");
+    }
+  };
 
   return (
             <div className="bg-gradient-to-tl from-stone-900 to-stone-800 h-full">
@@ -36,18 +81,17 @@ export default function Contact() {
           Let's Connect
         </h2>
         <form 
-        // onSubmit={handleSubmit(onSubmit)} 
+        onSubmit={handleSubmit(onSubmit)} 
         className="space-y-6"
-        action="https://formsubmit.co/72bda65f88d7101393a2c07130d85fd4" 
-        method="POST">
+        // action="https://formsubmit.co/72bda65f88d7101393a2c07130d85fd4" 
+        // method="POST
+        >
         
           <div className="form-group">
             <label
               htmlFor="firstName"
               className="block text-sm font-medium text-gray-700 form-control"
-            
             >
-                
               First Name:
               <input
                 type="text"
@@ -55,6 +99,10 @@ export default function Contact() {
                 name="firstName"
                 {...register("firstName", {
                   required: "First name is required",
+                    maxLength: {
+                      value: 50,
+                      message: "First name cannot exceed 50 characters",
+                    },
                 })}
                 id="firstName"
         className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
@@ -77,10 +125,20 @@ export default function Contact() {
                 type="text"
                 placeholder="Last Name"
                 name="lastName"
-                {...register("lastName")}
+                {...register("lastName", {
+                    maxLength: {
+                      value: 50,
+                      message: "Last name cannot exceed 50 characters",
+                    },
+                })}
                 id="lastName"
         className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
               />
+    {errors.lastName && (
+                  <span className="text-red-500 text-sm">
+                    {errors.lastName.message}
+                  </span>
+    )}
             </label>
           </div>
 
@@ -94,7 +152,13 @@ export default function Contact() {
                 type="email"
                 name="email"
                 placeholder="Email Address"
-                {...register("email", { required: "Email is required" })}
+                {...register("email", 
+                  { required: "Email is required",
+                    pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                    message: "Invalid email address",
+                    },
+                   })}
                 id="email"
         className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
               />
@@ -113,21 +177,22 @@ export default function Contact() {
             >
               Message:
               <textarea
-                      className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
-
+                className="mt-1 p-2 block w-full rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm"
+                name="text"
                 {...register("text", {
                   required: "Please enter your message",
                   minLength: {
                     value: 20,
                     message: "Message must be at least 20 characters long",
                   },
+                  maxLength: {
+                      value: 1000,
+                      message: "Message cannot exceed 1000 characters",
+                    },
                 })}
                 id="message"
                 placeholder="Your message here"
-                name="message"
                 rows={4}
-            
-
               />
               {errors.text && (
                 <span className="text-red-500 text-sm">
@@ -147,20 +212,36 @@ export default function Contact() {
                 type="url"
                 placeholder="https://www.linkedin.com/in/yourprofile"
                 name="linkedIn"
-                {...register("linkedIn")}
+                {...register("linkedIn", {
+                      pattern: {
+                      value: /^(ftp|http|https):\/\/[^ "]+$/,
+                      message: "Invalid URL format",
+                    },
+
+                })}
                 id="linkedin"
-        className="mt-1 block w-full p-2 rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
+                className="mt-1 block w-full p-2 rounded-md border-gray-300 bg-stone-100 text-stone-900 shadow-sm focus:border-stone-500 focus:ring-stone-500 sm:text-sm h-7"
               />
+               {errors.linkedIn && (
+                  <span className="text-red-500 text-sm">
+                    {errors.linkedIn.message}
+                  </span>
+                )}
+
             </label>
           </div>
 
               <div>
-                <input 
-                type="text" 
-                placeholder=""
-                autoComplete="off"
-                {...register("honeypot")}
-                name="honeypot" className="hidden" />
+               {/* Honeypot field for spam prevention - DO NOT REMOVE */}
+
+                {/* <input
+                type="text"
+                name="_honeypot" // Correct name for FormSubmit.co
+                {...register("_honeypot")} // Register the honeypot field
+                className="hidden" // Keep it hidden from users
+                tabIndex="-1" // Prevent focus
+                autoComplete="off" // Prevent browser autofill
+              /> */}
 
 
               </div>
