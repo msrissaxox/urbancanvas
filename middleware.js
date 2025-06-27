@@ -7,7 +7,7 @@ export function middleware(request) {
     "Content-Security-Policy",
     [
       "default-src 'self';",
-      "script-src 'self' https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://va.vercel-scripts.com;",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://accounts.google.com https://apis.google.com https://va.vercel-scripts.com;",
       "style-src 'self' 'unsafe-inline' fonts.googleapis.com;",
       "img-src 'self' data: https:;",
       "font-src 'self' fonts.gstatic.com;",
