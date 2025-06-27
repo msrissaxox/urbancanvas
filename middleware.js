@@ -15,7 +15,7 @@ export function middleware(request) {
       "frame-src 'self' https://accounts.google.com;",
       "object-src 'none';",
       "base-uri 'self';",
-      "form-action 'self';"
+      "form-action 'self' https://formsubmit.co;"
     ].join(' ')
   );
 
