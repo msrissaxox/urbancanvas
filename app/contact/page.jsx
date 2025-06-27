@@ -234,7 +234,7 @@ export default function Contact() {
                <input
                 type="text"
                 name="_honey" // Correct name for FormSubmit.co
-               style="display:none" // Hide honeypot field
+  style={{ display: "none" }} 
               /> 
 
 
