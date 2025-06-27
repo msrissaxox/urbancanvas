@@ -26,10 +26,16 @@ const limelight = Limelight({
    weight: ["400"],
 });
 
+export const metadata = {
+  title: "Urban Canvas - A Creative Space for Urban Art and Design",
+  description: "Urban Canvas is a platform to discover, share, and celebrate street art and murals from around the world. Join our creative community and map your favorite urban art!",
+};
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en"
+   
+    >
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased ${alumniSansPinstripe.variable} ${limelight.variable} bg-white text-black dark:bg-black dark:text-white weight-400`}   
       >
