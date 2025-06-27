@@ -19,7 +19,7 @@ export default function Contact() {
       email: "",
       text: "",
       linkedIn: "",
-      _honeypot: "", // Honeypot field for spam prevention
+      _honey: "", // Honeypot field for spam prevention
     },
   });
 //   const onSubmit = (data) => console.log(data);
@@ -36,10 +36,7 @@ export default function Contact() {
     }
 
     try {
-      // const response = await fetch("https://formsubmit.co/72bda65f88d7101393a2c07130d85fd4", {
-      //   method: "POST",
-      //   body: formData,
-      // });
+
 
       const response = await fetch("https://formsubmit.co/ajax/72bda65f88d7101393a2c07130d85fd4", {
   method: "POST",
@@ -236,8 +233,8 @@ export default function Contact() {
 
                <input
                 type="text"
-                name="_honeypot" // Correct name for FormSubmit.co
-                {...register("_honeypot")} // Register the honeypot field
+                name="_honey" // Correct name for FormSubmit.co
+                {...register("_honey")} // Register the honeypot field
                 className="hidden" // Keep it hidden from users
                 tabIndex="-1" // Prevent focus
                 autoComplete="off" // Prevent browser autofill
