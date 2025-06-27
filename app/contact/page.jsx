@@ -234,14 +234,14 @@ export default function Contact() {
               <div>
                {/* Honeypot field for spam prevention - DO NOT REMOVE */}
 
-                {/* <input
+               <input
                 type="text"
                 name="_honeypot" // Correct name for FormSubmit.co
                 {...register("_honeypot")} // Register the honeypot field
                 className="hidden" // Keep it hidden from users
                 tabIndex="-1" // Prevent focus
                 autoComplete="off" // Prevent browser autofill
-              /> */}
+              /> 
 
 
               </div>

@@ -11,7 +11,7 @@ export function middleware(request) {
       "style-src 'self' 'unsafe-inline' fonts.googleapis.com;",
       "img-src 'self' data: https:;",
       "font-src 'self' fonts.gstatic.com;",
-      "connect-src 'self' https://*.supabase.co https://urbancanvas.vercel.app https://*.vercel.app https://accounts.google.com https://apis.google.com https://va.vercel-scripts.com;",
+      "connect-src 'self' https://*.supabase.co https://urbancanvas.vercel.app https://*.vercel.app https://accounts.google.com https://apis.google.com https://va.vercel-scripts.com https://formsubmit.co;",
       "frame-src 'self' https://accounts.google.com;",
       "object-src 'none';",
       "base-uri 'self';",
