@@ -234,10 +234,7 @@ export default function Contact() {
                <input
                 type="text"
                 name="_honey" // Correct name for FormSubmit.co
-                {...register("_honey")} // Register the honeypot field
-                className="hidden" // Keep it hidden from users
-                tabIndex="-1" // Prevent focus
-                autoComplete="off" // Prevent browser autofill
+               style="display:none" // Hide honeypot field
               /> 
 
 
