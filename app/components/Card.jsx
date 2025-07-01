@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
 import { createClient } from "@supabase/supabase-js";
+
 import { onImageRemove } from "./utils/ImageRemoval";
 import { handleImageUpdate } from "./utils/ImageUpdate";
+import { fetchPostsandLikesandUsers } from "./utils/FetchPostsandLikesandUsers";  
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -47,63 +49,66 @@ const onUpdate = (imageList, index) =>
     setLikeCount,
   });
 
-  const fetchPostsandLikesandUsers = async () => {
-    setLoading(true);
-    try {
-      const postResponse = await fetch("/api/posts");
-      const postsData = await postResponse.json();
+  // const fetchPostsandLikesandUsers = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const postResponse = await fetch("/api/posts");
+  //     const postsData = await postResponse.json();
 
-      console.log("postsData", postsData);
-      if (!postsData.success) {
-        console.error("Failed to fetch posts:", postsData.message);
-        setPosts([]);
-        setLoading(false);
-        return;
-      }
-      //Get the likes from the database
-      const likeResponse = await fetch(`/api/posts/likes`);
-      const likesData = await likeResponse.json();
-      if (!likesData.success) {
-        console.error("Failed to fetch likes:", likesData.message);
-        setPosts([]);
-        setLoading(false);
-        return;
-      }
+  //     console.log("postsData", postsData);
+  //     if (!postsData.success) {
+  //       console.error("Failed to fetch posts:", postsData.message);
+  //       setPosts([]);
+  //       setLoading(false);
+  //       return;
+  //     }
+  //     //Get the likes from the database
+  //     const likeResponse = await fetch(`/api/posts/likes`);
+  //     const likesData = await likeResponse.json();
+  //     if (!likesData.success) {
+  //       console.error("Failed to fetch likes:", likesData.message);
+  //       setPosts([]);
+  //       setLoading(false);
+  //       return;
+  //     }
 
-      const userResponse = await fetch("/api/users");
-      const usersData = await userResponse.json();
+  //     const userResponse = await fetch("/api/users");
+  //     const usersData = await userResponse.json();
 
-      const mergedPosts = postsData.data.map((post) => {
-        let isLiked = false;
-        if (user) {
-          const likeData = likesData.data.find(
-            (like) => like.post_id === post.id && like.user_id === user.id
-          );
-          isLiked = !!likeData;
-        }
-        const postUser = usersData.data.find(
-          (user) => String(user.id) === String(post.user_id)
-        );
-        return {
-          ...post,
-          isLiked,
-          like: likesData.data.filter((like) => like.post_id === post.id)
-            .length,
-          user: postUser,
-        };
-      });
-      console.log("mergedPosts", mergedPosts);
+  //     const mergedPosts = postsData.data.map((post) => {
+  //       let isLiked = false;
+  //       if (user) {
+  //         const likeData = likesData.data.find(
+  //           (like) => like.post_id === post.id && like.user_id === user.id
+  //         );
+  //         isLiked = !!likeData;
+  //       }
+  //       const postUser = usersData.data.find(
+  //         (user) => String(user.id) === String(post.user_id)
+  //       );
+  //       return {
+  //         ...post,
+  //         isLiked,
+  //         like: likesData.data.filter((like) => like.post_id === post.id)
+  //           .length,
+  //         user: postUser,
+  //       };
+  //     });
+  //     console.log("mergedPosts", mergedPosts);
 
-      setPosts(mergedPosts);
-    } catch (error) {
-      console.error("Error fetching posts and likes:", error);
-    }
-    setLoading(false);
-  };
+  //     setPosts(mergedPosts);
+  //   } catch (error) {
+  //     console.error("Error fetching posts and likes:", error);
+  //   }
+  //   setLoading(false);
+  // };
+
+
+
 
   //fetch posts from the database
   useEffect(() => {
-    fetchPostsandLikesandUsers();
+    fetchPostsandLikesandUsers({user, setPosts, setLoading});
   }, [user]);
 
   const onChange = (imageList) => {
@@ -119,54 +124,6 @@ const onUpdate = (imageList, index) =>
     }));
     setImages(updatedList);
   };
-
-  //Handle image Update
-  // const handleImageUpdate = async (imageList, index) => {
-  //   if (!imageList[0]) return;
-  //   const updatedImage = imageList[0].data_url; // Or handle file upload if using storage
-  //   const city = imageList[0].city;
-  //   const state = imageList[0].state;
-  //   const caption = imageList[0].caption;
-  //   try {
-  //     const response = await fetch(`/api/update/${posts[index].id}`, {
-  //       method: "PUT",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         image_url: updatedImage,
-  //         city,
-  //         state,
-  //         caption,
-  //       }),
-  //     });
-  //     const data = await response.json();
-  //     if (data.success) {
-  //       const updatedPosts = [...posts];
-  //       updatedPosts[index] = {
-  //         ...updatedPosts[index],
-  //         image_url: updatedImage,
-  //         like: 0, // Reset likes to 0
-  //         isLiked: false,
-  //       };
-  //       setPosts(updatedPosts);
-  //       setUpdatingPostIndex(null);
-  //       setUpdateImageList([]);
-
-  //       //fetch posts from the database
-  //       await fetchPostsandLikesandUsers(); // Refresh posts after update
-  //       setLikeCount(0); // Reset like count for the updated post
-  //     } else {
-  //       console.error("Failed to update post:", data.message);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error updating post:", error);
-  //   }
-  // };
-
-
-
-
-
-
 
 
 
