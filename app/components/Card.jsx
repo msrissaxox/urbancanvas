@@ -186,65 +186,6 @@ export default function Card({ accessToken, user }) {
     setImages(updatedImages);
   };
 
-  //handle submit button
-
-  // const handleSubmit = async () => {
-  //   if (submitting) return; // Prevent double submit
-  //   setSubmitting(true);
-
-  //   const isValid = images.every(
-  //     (image) => image.city && image.state && image.caption && image.data_url
-  //   );
-  //   console.log("images", images);
-  //   if (!isValid) {
-  //     alert("Please fill in all fields for each image.");
-  //     setSubmitting(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     console.log("submitting post", images[0]);
-  //     // Send the image data to the backend
-  //     const response = await fetch("/api/posts", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         //this is giving me an error
-  //         user_id: user.id, // Replace with the logged-in user's ID
-  //         // user_id: session?.user?.oauth_id, // Use oauth_id here
-  //         //session?.user.id || this was there before
-  //         caption: images[0].caption,
-  //         city: images[0].city,
-  //         state: images[0].state,
-  //         image_url: images[0].data_url, // Use the uploaded image URL
-  //         // image_url: images[0].image_url, // Use the uploaded image URL
-  //       }),
-  //     });
-
-  //     const data = await response.json();
-  //     if (data.success) {
-  //       await fetchPostsandLikesandUsers(); // Refresh posts after submission
-  //       setImages([]); // Clear the images
-  //       setSubmittedImages([]); // Clear submitted images
-  //       showSubmitButton(false); // Hide the submit button
-  //       showCancelButton(false); // Hide the cancel button
-  //     } else {
-  //       console.error("Failed to create post:", data.message);
-  //       alert("Failed to create post: " + data.message);
-  //       // Optionally, you can reset the images here if needed
-  //       setImages([]); // Clear the images
-  //       setSubmittedImages([]); // Clear submitted images
-  //       showSubmitButton(false); // Hide the submit button
-  //       showCancelButton(false); // Hide the cancel button
-  //       // Reset the state to allow for a new submission
-  //       setSubmitting(false); // Re-enable the submit button
-  //       return;
-  //     }
-  //   } catch (error) {
-  //     console.error("Error creating post:", error);
-  //   }
-  //   setSubmitting(false); // Always re-enable after done
-  // };
 
 const handleSubmit = async () => {
   if (submitting) return;
@@ -519,26 +460,27 @@ const handleSubmit = async () => {
                   <div className="flex flex-col justify-between w-full mb-2">
                     {/*Location */}
 
-                    <div className="flex items-center justify-center gap-1">
+                    <div className="flex items-center justify-center gap-1 mb-6">
                       <span>📍</span>
-                      <h5 className="text-stone-100 text-md alumniSansPinstripe font-bold">
+                      <h5 className="text-stone-100  text-sm  alumniSansPinstripe font-bold">
                         {post.city},
                       </h5>
-                      <h5 className="text-stone-100 text-md alumniSansPinstripe font-bold">
+                      <h5 className="text-stone-100 text-sm alumniSansPinstripe font-bold">
                         {post.state}
                       </h5>
                     </div>
+
                     <p
-                      className="text-stone-100 text-lg font-bold alumniSansPinstripe flex items-center  text-center justify-center h-20"
-                      style={{ lineHeight: "1.5rem" }}
+                      className="text-stone-100 text-md font-bold alumniSansPinstripe flex items-start text-center justify-center h-10 md:h-20"
+                      style={{ lineHeight: "1.1rem" }}
                     >
                       {post.caption || "No caption available"}
                     </p>
                   </div>
 
                   {/* Like & Share */}
-                  <div className="flex flex-row justify-center items-center gap-2 h-7">
-                    <div className="flex justify-start items-start mt-2">
+                  <div className="flex flex-row justify-center h-7 pb-20 md:pb-10">
+                    <div className="flex justify-start items-start">
                       <svg
                         onClick={() => handleClick(index)}
                         xmlns="http://www.w3.org/2000/svg"
