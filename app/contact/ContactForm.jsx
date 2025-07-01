@@ -63,8 +63,6 @@ const {
               <form
                 onSubmit={handleSubmit(onSubmit)}
                 className="space-y-6"
-                // action="https://formsubmit.co/72bda65f88d7101393a2c07130d85fd4"
-                // method="POST
               >
                 <div className="form-group">
                   <label
