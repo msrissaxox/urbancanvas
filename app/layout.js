@@ -1,7 +1,6 @@
 // "use client";
 import { Geist, Geist_Mono, Limelight, Alumni_Sans_Pinstripe } from "next/font/google";
 import "./globals.css";
-// import { SessionProvider } from "next-auth/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

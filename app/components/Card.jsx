@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
 import { createClient } from "@supabase/supabase-js";
-
+import { onImageRemove } from "./utils/ImageRemoval";
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -21,7 +21,6 @@ export default function Card({ accessToken, user }) {
 
   const [submitting, setSubmitting] = useState(false);
 
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [likeCount, setLikeCount] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -149,34 +148,40 @@ export default function Card({ accessToken, user }) {
     }
   };
 
-  //Handle image Remove
-  const onImageRemove = async (index) => {
-    if (!accessToken) {
-      alert("Could not get Supabase access token.");
-      return;
-    }
 
-    try {
-      const response = await fetch(`/api/delete/${posts[index].id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`, // Include the session access token
-        },
-      });
 
-      const data = await response.json();
-      if (data.success) {
-        console.log("Deleting post with id:", posts[index].id);
-        const updatedPosts = posts.filter((_, i) => i !== index);
-        setPosts(updatedPosts);
-      } else {
-        console.error("Failed to delete post:", data.message);
-      }
-    } catch (error) {
-      console.error("Error deleting post:", error);
-    }
-  };
+  // //Handle image Remove
+  // const onImageRemove = async (index) => {
+  //   if (!accessToken) {
+  //     alert("Could not get Supabase access token.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch(`/api/delete/${posts[index].id}`, {
+  //       method: "DELETE",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${accessToken}`, // Include the session access token
+  //       },
+  //     });
+
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       console.log("Deleting post with id:", posts[index].id);
+  //       const updatedPosts = posts.filter((_, i) => i !== index);
+  //       setPosts(updatedPosts);
+  //     } else {
+  //       console.error("Failed to delete post:", data.message);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting post:", error);
+  //   }
+  // };
+
+
+
+
 
   // Update Input Fields (City, State, Caption)
   const handleInputChange = (index, field, value) => {
@@ -514,7 +519,7 @@ const handleSubmit = async () => {
                           </button>
                           <button
                             className="text-2xl font-bold px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
-                            onClick={() => onImageRemove(index)}
+                            onClick={() => onImageRemove(index, posts, setPosts, accessToken)}
                           >
                             REMOVE
                           </button>
