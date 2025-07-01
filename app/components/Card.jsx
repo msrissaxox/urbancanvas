@@ -76,6 +76,7 @@ export default function Card({ accessToken, user }) {
     setImages(updatedImages);
   };
 
+
   // const handleSubmit = async () => {
   //   if (submitting) return;
   //   setSubmitting(true);
@@ -134,7 +135,8 @@ export default function Card({ accessToken, user }) {
   //   setSubmitting(false);
   // };
 
-const handleSubmit = () => {
+const handleSubmit = (e) => {
+  
   handleSubmitUtil({
     images,
     user,
@@ -147,13 +149,6 @@ const handleSubmit = () => {
     fetchPostsandLikesandUsers,
   })
 }
-
-
-
-
-
-
-
 
   //This function checks to see if the like button has been clicked.
   // If it has, it will increment the like count by 1.
