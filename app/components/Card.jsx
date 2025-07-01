@@ -136,7 +136,8 @@ export default function Card({ accessToken, user }) {
   // };
 
 const handleSubmit = (e) => {
-  
+  e.preventDefault?.(); // Only if used in a form
+
   handleSubmitUtil({
     images,
     user,
