@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
 import { createClient } from "@supabase/supabase-js";
-import { set } from "react-hook-form";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,

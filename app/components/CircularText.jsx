@@ -53,7 +53,7 @@ const CircularText = ({
       case "speedUp":
         controls.start({
           rotate: currentRotation + 360,
-          scale: 1,
+          scale: 1.1,
           transition: getTransition(spinDuration / 4, currentRotation),
         });
         break;
