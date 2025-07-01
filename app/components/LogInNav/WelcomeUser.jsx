@@ -1,4 +1,3 @@
-// import { useSession } from "next-auth/react";
 
 export default function WelcomeUser( { user}) {
  if (!user) return null;  // const userName = session.user.name || "User";

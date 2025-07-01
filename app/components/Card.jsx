@@ -478,7 +478,7 @@ const handleSubmit = async () => {
                   </div>
 
                   {/* Like & Share */}
-                  <div className="flex flex-row justify-center h-7 pb-20 md:pb-10">
+                  <div className="flex flex-row justify-center h-7 pb-10 mb-10 md:pb-10">
                     <div className="flex justify-start items-start">
                       <svg
                         onClick={() => handleClick(index)}
