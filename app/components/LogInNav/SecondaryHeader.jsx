@@ -31,7 +31,7 @@ export default function SecondaryHeader() {
    
 <Header />
 
-            <div className="flex flex-col items-center lg:flex-row lg:space-x-4 ">
+            {/* <div className="flex flex-col items-center lg:flex-row lg:space-x-4 ">
 
     {user ? (  
       <>
@@ -43,7 +43,7 @@ export default function SecondaryHeader() {
 
     <LoginButton />
     )}
-    </div>
+    </div> */}
     </nav>
   );
 }

@@ -276,13 +276,6 @@ setLikeCount(0); // Reset like count for the updated post
     const updatedPosts = [...posts];
     const post = updatedPosts[index];
 
-  // // If already liked, do nothing
-  // if (post.isLiked) {
-    
-
-  //   return;
-  // }
-
   // Toggle the like state
   const isLiked = !post.isLiked;
   const newLikeCount = isLiked ? post.like + 1 : post.like - 1;
