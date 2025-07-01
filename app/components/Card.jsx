@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
 import { createClient } from "@supabase/supabase-js";
+import { set } from "react-hook-form";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -187,64 +188,121 @@ export default function Card({ accessToken, user }) {
 
   //handle submit button
 
-  const handleSubmit = async () => {
-    if (submitting) return; // Prevent double submit
-    setSubmitting(true);
+  // const handleSubmit = async () => {
+  //   if (submitting) return; // Prevent double submit
+  //   setSubmitting(true);
 
-    const isValid = images.every(
-      (image) => image.city && image.state && image.caption && image.data_url
-    );
-    console.log("images", images);
-    if (!isValid) {
-      alert("Please fill in all fields for each image.");
+  //   const isValid = images.every(
+  //     (image) => image.city && image.state && image.caption && image.data_url
+  //   );
+  //   console.log("images", images);
+  //   if (!isValid) {
+  //     alert("Please fill in all fields for each image.");
+  //     setSubmitting(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     console.log("submitting post", images[0]);
+  //     // Send the image data to the backend
+  //     const response = await fetch("/api/posts", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         //this is giving me an error
+  //         user_id: user.id, // Replace with the logged-in user's ID
+  //         // user_id: session?.user?.oauth_id, // Use oauth_id here
+  //         //session?.user.id || this was there before
+  //         caption: images[0].caption,
+  //         city: images[0].city,
+  //         state: images[0].state,
+  //         image_url: images[0].data_url, // Use the uploaded image URL
+  //         // image_url: images[0].image_url, // Use the uploaded image URL
+  //       }),
+  //     });
+
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       await fetchPostsandLikesandUsers(); // Refresh posts after submission
+  //       setImages([]); // Clear the images
+  //       setSubmittedImages([]); // Clear submitted images
+  //       showSubmitButton(false); // Hide the submit button
+  //       showCancelButton(false); // Hide the cancel button
+  //     } else {
+  //       console.error("Failed to create post:", data.message);
+  //       alert("Failed to create post: " + data.message);
+  //       // Optionally, you can reset the images here if needed
+  //       setImages([]); // Clear the images
+  //       setSubmittedImages([]); // Clear submitted images
+  //       showSubmitButton(false); // Hide the submit button
+  //       showCancelButton(false); // Hide the cancel button
+  //       // Reset the state to allow for a new submission
+  //       setSubmitting(false); // Re-enable the submit button
+  //       return;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error creating post:", error);
+  //   }
+  //   setSubmitting(false); // Always re-enable after done
+  // };
+
+const handleSubmit = async () => {
+  if (submitting) return;
+  setSubmitting(true);
+
+  const isValid = images.every(
+    (image) => image.city && image.state && image.caption && image.data_url
+  );
+  if (!isValid) {
+    alert("Please fill in all fields for each image.");
+    setSubmitting(false);
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        caption: images[0].caption,
+        city: images[0].city,
+        state: images[0].state,
+        image_url: images[0].data_url,
+      }),
+    });
+
+    // Check for network errors
+    if (!response.ok) {
+      const text = await response.text();
+      alert(`Network/API error: ${response.status} - ${text}`);
+      setSubmitting(false);
       return;
     }
 
-    try {
-      console.log("submitting post", images[0]);
-      // Send the image data to the backend
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          //this is giving me an error
-          user_id: user.id, // Replace with the logged-in user's ID
-          // user_id: session?.user?.oauth_id, // Use oauth_id here
-          //session?.user.id || this was there before
-          caption: images[0].caption,
-          city: images[0].city,
-          state: images[0].state,
-          image_url: images[0].data_url, // Use the uploaded image URL
-          // image_url: images[0].image_url, // Use the uploaded image URL
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        await fetchPostsandLikesandUsers(); // Refresh posts after submission
-        setImages([]); // Clear the images
-        setSubmittedImages([]); // Clear submitted images
-        showSubmitButton(false); // Hide the submit button
-        showCancelButton(false); // Hide the cancel button
-      } else {
-        console.error("Failed to create post:", data.message);
-        alert("Failed to create post: " + data.message);
-        // Optionally, you can reset the images here if needed
-        setImages([]); // Clear the images
-        setSubmittedImages([]); // Clear submitted images
-        showSubmitButton(false); // Hide the submit button
-        showCancelButton(false); // Hide the cancel button
-        // Reset the state to allow for a new submission
-        setSubmitting(false); // Re-enable the submit button
-        return;
-      }
-    } catch (error) {
-      console.error("Error creating post:", error);
+    const data = await response.json();
+    if (data.success) {
+      await fetchPostsandLikesandUsers();
+      setImages([]);
+      setSubmittedImages([]);
+      showSubmitButton(false);
+      showCancelButton(false);
+    } else {
+      alert("Failed to create post: " + (data.message || "Unknown error"));
+      setImages([]);
+      setSubmittedImages([]);
+      showSubmitButton(false);
+      showCancelButton(false);
+      setSubmitting(false);
+      return;
     }
-    setSubmitting(false); // Always re-enable after done
-  };
-
-
+  } catch (error) {
+    alert("Error creating post: " + error.message);
+    setSubmitting(false);
+    return;
+  }
+  setSubmitting(false);
+};
 
 
 
