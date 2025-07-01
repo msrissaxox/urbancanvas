@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import ImageUploading from "react-images-uploading";
 import { createClient } from "@supabase/supabase-js";
 import { onImageRemove } from "./utils/ImageRemoval";
+import { handleImageUpdate } from "./utils/ImageUpdate";
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -32,6 +34,18 @@ export default function Card({ accessToken, user }) {
     updated[imgIdx] = { ...updated[imgIdx], [field]: value };
     setUpdateImageList(updated);
   };
+
+const onUpdate = (imageList, index) =>
+  handleImageUpdate({
+    imageList,
+    index,
+    posts,
+    setPosts,
+    setUpdatingPostIndex,
+    setUpdateImageList,
+    fetchPostsandLikesandUsers,
+    setLikeCount,
+  });
 
   const fetchPostsandLikesandUsers = async () => {
     setLoading(true);
@@ -107,77 +121,50 @@ export default function Card({ accessToken, user }) {
   };
 
   //Handle image Update
-  const handleImageUpdate = async (imageList, index) => {
-    if (!imageList[0]) return;
-    const updatedImage = imageList[0].data_url; // Or handle file upload if using storage
-    const city = imageList[0].city;
-    const state = imageList[0].state;
-    const caption = imageList[0].caption;
-    try {
-      const response = await fetch(`/api/update/${posts[index].id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          image_url: updatedImage,
-          city,
-          state,
-          caption,
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        const updatedPosts = [...posts];
-        updatedPosts[index] = {
-          ...updatedPosts[index],
-          image_url: updatedImage,
-          like: 0, // Reset likes to 0
-          isLiked: false,
-        };
-        setPosts(updatedPosts);
-        setUpdatingPostIndex(null);
-        setUpdateImageList([]);
-
-        //fetch posts from the database
-        await fetchPostsandLikesandUsers(); // Refresh posts after update
-        setLikeCount(0); // Reset like count for the updated post
-      } else {
-        console.error("Failed to update post:", data.message);
-      }
-    } catch (error) {
-      console.error("Error updating post:", error);
-    }
-  };
-
-
-
-  // //Handle image Remove
-  // const onImageRemove = async (index) => {
-  //   if (!accessToken) {
-  //     alert("Could not get Supabase access token.");
-  //     return;
-  //   }
-
+  // const handleImageUpdate = async (imageList, index) => {
+  //   if (!imageList[0]) return;
+  //   const updatedImage = imageList[0].data_url; // Or handle file upload if using storage
+  //   const city = imageList[0].city;
+  //   const state = imageList[0].state;
+  //   const caption = imageList[0].caption;
   //   try {
-  //     const response = await fetch(`/api/delete/${posts[index].id}`, {
-  //       method: "DELETE",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${accessToken}`, // Include the session access token
-  //       },
+  //     const response = await fetch(`/api/update/${posts[index].id}`, {
+  //       method: "PUT",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         image_url: updatedImage,
+  //         city,
+  //         state,
+  //         caption,
+  //       }),
   //     });
-
   //     const data = await response.json();
   //     if (data.success) {
-  //       console.log("Deleting post with id:", posts[index].id);
-  //       const updatedPosts = posts.filter((_, i) => i !== index);
+  //       const updatedPosts = [...posts];
+  //       updatedPosts[index] = {
+  //         ...updatedPosts[index],
+  //         image_url: updatedImage,
+  //         like: 0, // Reset likes to 0
+  //         isLiked: false,
+  //       };
   //       setPosts(updatedPosts);
+  //       setUpdatingPostIndex(null);
+  //       setUpdateImageList([]);
+
+  //       //fetch posts from the database
+  //       await fetchPostsandLikesandUsers(); // Refresh posts after update
+  //       setLikeCount(0); // Reset like count for the updated post
   //     } else {
-  //       console.error("Failed to delete post:", data.message);
+  //       console.error("Failed to update post:", data.message);
   //     }
   //   } catch (error) {
-  //     console.error("Error deleting post:", error);
+  //     console.error("Error updating post:", error);
   //   }
   // };
+
+
+
+
 
 
 
@@ -190,66 +177,63 @@ export default function Card({ accessToken, user }) {
     setImages(updatedImages);
   };
 
+  const handleSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
 
-const handleSubmit = async () => {
-  if (submitting) return;
-  setSubmitting(true);
-
-  const isValid = images.every(
-    (image) => image.city && image.state && image.caption && image.data_url
-  );
-  if (!isValid) {
-    alert("Please fill in all fields for each image.");
-    setSubmitting(false);
-    return;
-  }
-
-  try {
-    const response = await fetch("/api/posts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: user.id,
-        caption: images[0].caption,
-        city: images[0].city,
-        state: images[0].state,
-        image_url: images[0].data_url,
-      }),
-    });
-
-    // Check for network errors
-    if (!response.ok) {
-      const text = await response.text();
-      alert(`Network/API error: ${response.status} - ${text}`);
+    const isValid = images.every(
+      (image) => image.city && image.state && image.caption && image.data_url
+    );
+    if (!isValid) {
+      alert("Please fill in all fields for each image.");
       setSubmitting(false);
       return;
     }
 
-    const data = await response.json();
-    if (data.success) {
-      await fetchPostsandLikesandUsers();
-      setImages([]);
-      setSubmittedImages([]);
-      showSubmitButton(false);
-      showCancelButton(false);
-    } else {
-      alert("Failed to create post: " + (data.message || "Unknown error"));
-      setImages([]);
-      setSubmittedImages([]);
-      showSubmitButton(false);
-      showCancelButton(false);
+    try {
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          caption: images[0].caption,
+          city: images[0].city,
+          state: images[0].state,
+          image_url: images[0].data_url,
+        }),
+      });
+
+      // Check for network errors
+      if (!response.ok) {
+        const text = await response.text();
+        alert(`Network/API error: ${response.status} - ${text}`);
+        setSubmitting(false);
+        return;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        await fetchPostsandLikesandUsers();
+        setImages([]);
+        setSubmittedImages([]);
+        showSubmitButton(false);
+        showCancelButton(false);
+      } else {
+        alert("Failed to create post: " + (data.message || "Unknown error"));
+        setImages([]);
+        setSubmittedImages([]);
+        showSubmitButton(false);
+        showCancelButton(false);
+        setSubmitting(false);
+        return;
+      }
+    } catch (error) {
+      alert("Error creating post: " + error.message);
       setSubmitting(false);
       return;
     }
-  } catch (error) {
-    alert("Error creating post: " + error.message);
     setSubmitting(false);
-    return;
-  }
-  setSubmitting(false);
-};
-
-
+  };
 
   //This function checks to see if the like button has been clicked.
   // If it has, it will increment the like count by 1.
@@ -519,7 +503,9 @@ const handleSubmit = async () => {
                           </button>
                           <button
                             className="text-2xl font-bold px-4 flex-1 py-2 border rounded alumniSansPinstripe text-stone-100 border-stone-100 hover:border-transparent hover:text-gray-500 hover:bg-stone-100 transition duration-300"
-                            onClick={() => onImageRemove(index, posts, setPosts, accessToken)}
+                            onClick={() =>
+                              onImageRemove(index, posts, setPosts, accessToken)
+                            }
                           >
                             REMOVE
                           </button>
@@ -622,7 +608,7 @@ const handleSubmit = async () => {
                                 <button
                                   className="px-4 py-2 flex-1 bg-green-900 alumniSansPinstripe text-xl text-white rounded hover:border-transparent hover:text-white hover:bg-green-700 transition duration-300"
                                   onClick={() =>
-                                    handleImageUpdate(updateImageList, index)
+                                    onUpdate(updateImageList, index)
                                   }
                                 >
                                   SAVE
